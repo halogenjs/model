@@ -1,7 +1,7 @@
 {
-  "name": "component-skeleton",
-  "repo": "charlottegore/component-skeleton",
-  "description": "Replace this with the description of the module",
+  "name": "hyperbone-model",
+  "repo": "green-mesa/hyperbone-model",
+  "description": "HAL extensions for Backbone Models",
   "version": "0.0.1",
   "keywords": [],
   "dependencies": {},
