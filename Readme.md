@@ -1,109 +1,107 @@
-# Component Skeleton
 
-  A stub/skeleton project for developing Components. Uses Grunt to run jshint on your source file, install dependencies, build your component and then run tests using mocha-phantomjs with chai.
+# Hyperbone Model
 
-## PhantomJS
+  Backbone Models, but with Hypermedia Extensions. Because of the hypermedia, interactions with resources are through 
+  controls. This is a local module for local people - we don't want any CRUD here. This means the jQuery requirin' 
+  sync stuff on the Model prototype isn't enabled by default. Backbone sync is available as a standalone module with
+  which you can extend the Hyperbone model's prototype but please: Don't. 
 
-  Hard to say if this step is essential, but I found the test runner only works if PhantomJS is installed, is up to date, and is in your $PATH environment var. This may apply only to windows. 
+  Hyperbone Models are for use with the Hyperbone Framework, which when it's finished will solve the problem of the 
+  lack of a framework for taking hypermedia models (with controls), throwing them at views and everything just
+  magically working. More on this as and when there's more.
 
 ## Installation
 
-  Clone the repo to a useful folder, remove the existing remote repo and add your own.
+  Install with [component(1)](http://component.io):
 
-```bash
-$ git clone git@github.com:CharlotteGore/component-skeleton.git difference-engine-emulator
-$ cd difference-engine-emulator
-$ git remote rm origin
-$ git remote add origin git@github.com:AdaLovelace/difference-engine-emulator.git
-$ npm install
-```
+    $ component install green-mesa/hyperbone-model
 
-  If you don't have Grunt cli installed already, you should also do:
+## API
 
-```bash
-$ npm install -g grunt-cli
-```
+Hypermedia extentions include understanding where 'self' points, and automatic embedding
+of collections and models. This neatly gets around backbone's limitation on non-nested properties
+for models. Neato!
 
-  And if you haven't got Component cli tools already installed you should do:
 
-```bash
-$ npm install -g component
-```
-  And you're going to need node and npm installed to do any of this. Obviously.
-
-## Basic configuration of the component.json
-
-  The component.json in the repo is just a stup. As a minimum, replace
 
 ```javascript
-"name": "component-skeleton",
-"repo": "charlottegore/component-skeleton",
-"description": "Replace this with the description of the module",
- ```
-   with
+  var Model = require('hyperbone-model').Model;
+  var Collection = require('hyperbone-model').Collection;
 
-```javascript
-"name": "difference-engine-emulator",
-"repo": "adalovelace/difference-engine-emulator",
-"description": "A Javascript emulation of Babbage's Difference Engine. He never finished it, lazy bugger.",
+  // create a hyperbone model for a single page
+  var Page = Model.extend({});
+
+  // create an Author model
+  var Author = Model.extend({})
+
+  // create a hyperbone collection for pages
+  var Pages = Collection.extend({
+    model : Page
+  });
+
+  // create a hyperbone model for a book
+  var Book = Model.extend({
+    embed : {
+      "pages" : Pages, // we'll turn _embedded["pages"] into teh Pages collection
+      "author" : Author // we'll turn _embedded["author"] into an Author model.
+    }
+  });
+
+
+  var book = new Book({
+    _links : {
+      self : {
+        href : "books/book1"
+      },
+      alternate : {
+        href : "books/book1.html"
+      }
+    },
+    title : "Hello World: A Novel",
+    isbn : "123098108398213",
+    _embedded : {
+      "pages" : [
+        {
+          pageNumber : 1,
+          content : "some stuff"
+        },
+        {
+          pageNumber : 2,
+          content : "some more stuff"          
+        }
+      ],
+      "author" : {
+        name : "A. N. Other",
+        _links : {
+          self : {
+            href : "authors/another"            
+          },
+          portrait : {
+            href : "authors/another.jpg"
+          }
+        }
+      }
+
+    }
+
+  });
+
+
+  book.url() === "books/book1"; // true
+
+  // the 'pages' data embedded in the hypermedia automically becomes an attribute on the model
+
+  book.get("pages").each(function( page ){
+
+    readAloud(page.get("content"));
+
+  });
+
+  book.get("author").get("name") === "A. N. Other"; // TRUE
+
+
 ```
 
-  In this example, after pushing up to github, everyone can do...
-
-```bash
-$ component install adalovelace/difference-engine-emulator
-```
-
-  .. and then invoke your module with
-
-```javascript
-	var engine = require('difference-engine-emulator')
-```
-
-## Grunt commands
-
-### Test
-
-  Runs the tests. In this case, it uses mocha-phantomjs with chai to open the testrunner.html, which loads test.js.
-
-  All set up, ready to go... just add tests.
-
-  This actually works on Windows, too.
-
- ```bash
-$ grunt test
-```
-
-### Install
-
-  Installs Component dependencies
-
-```bash
-$ grunt install
-```
-### Build
-
-  Builds the Component to build/build.js
-
-```bash
-$ grunt build
-```
-
-### Jshint
-
-  Runs JSHint against index.js
-
- ```bash
-$ grunt jshint
-```
-
-### Watch
-
-  Watches index.js and when it detects changes it runs jshint, then install, then build then test automatically.
-
- ```bash
-$ grunt watch
-```
 
 
 ## License
