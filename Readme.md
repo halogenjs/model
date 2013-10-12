@@ -1,4 +1,3 @@
-
 # Hyperbone Model
 
   [Backbone](http://backbonejs.org/) Models with [Hypermedia](http://stateless.co/hal_specification.html) Extensions. 
@@ -10,15 +9,19 @@
 
   Well, at this point, Backbone sort of gets in your way a little. 
 
-  Hyperbone Model is a response to this: It takes the useful bits of Backbone for Hypermedia - the Models, Collections and Event (helpfully extracted and made standalone [components](http://component.io) ) and adds Hypermedia extensions.
+  Hyperbone Model is a response to this: It takes only the useful bits of Backbone for Hypermedia - the Models, Collections and Event (helpfully extracted and made standalone [components](http://component.io) ) and adds Hypermedia extensions. This means that this particular component does not require jQuery. 
 
   It is part of a larger framework for building client-side apps with Hypermedia.
+  
+## WARNING!
+
+  Because of the need to remove the jQuery dependency (in keeping with the component philosophy of not bundling huge libraries with components) the .sync functionality of the Backbone models has been disabled. It can be readded. See (backbone-sync)[http://github.com/green-mesa/backbone-sync]. 
 
 ## Features
 
   - _links support, with 'self' mapped to .url()
   - Curie support with fully qualified rel uri lookup for curied rels
-  - support for uri templating to RFC6570, thanks to (Franz Antesberger)[https://github.com/ericgj/uritemplate] )
+  - support for uri templating to RFC6570, thanks to https://github.com/ericgj/uritemplate
   - automatic mapping of _embedded data to attributes
   - automatic conversion of objects and arrays of objects to models and collections (including from _embedded) with events cascaded to the parent
   - ability to assign specific Model prototypes for use with specific attributes with custom _prototypes attribute.
