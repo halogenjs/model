@@ -54,17 +54,12 @@ var fixtures = {
 				href : "/attribute-test"
 			}
 		},
-		anArray : [
-			"item one",
-			"item two",
-			"item three"
-		],
 		anObject : {
 			name : "name inside an object",
 			description : "description inside an object"
 
 		},
-		anArrayofObject : [
+		anArrayofObjects : [
 			{
 				name : "obj 1",
 				description: "desc 1"
@@ -561,5 +556,11 @@ var fixtures = {
 		}
 	},
 
+
+};
+
+var useFixture = function(id){
+
+	return JSON.parse( JSON.stringify(fixtures[id]) );
 
 };

@@ -31,7 +31,7 @@ module.exports = function(grunt){
 		},
 		watch : {
 			files : ["index.js", "local/*.js"],
-			tasks : ['jshint', 'shell:install', 'shell:build', 'mocha_phantomjs']				
+			tasks : ['shell:build', 'mocha_phantomjs']				
 		}
 	});
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
