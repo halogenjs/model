@@ -87,9 +87,9 @@ var fixtures = {
 					self : {
 						href : "/single-item"
 					},
-					name : "single item",
-					description : "A single item"
-				}
+				},
+				name : "single item",
+				description : "A single item"
 			},
 			"multiple-items" : [
 				{

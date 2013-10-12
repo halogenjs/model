@@ -20,7 +20,7 @@ describe("Hyperbone model", function(){
 		var Model = require('hyperbone-model').Model;
 
 		it("does the usual backbone shit with bog standard attributes", function(){
-			
+
 			var m = new Model({ _links : { self : { href : "/test"}}, name : "lol", description : "test"});
 
 			expect( m.get("name") ).to.equal("lol");
@@ -113,7 +113,7 @@ describe("Hyperbone model", function(){
 
 		it("turns an array of embedded objects into a collection of models", function(){
 
-			var m = new Model( useFixed('embed-test') );
+			var m = new Model( useFixture('/embed-test') );
 
 			expect( m.get("multiple-items").length ).to.equal(3)
 
@@ -139,19 +139,15 @@ describe("Hyperbone model", function(){
 			});
 
 			expect( m.get("test").get("lol") ).to.equal("rofl");
-			expect( m.get("test").get("rolf") ).to.equal("lol");
+			expect( m.get("test").get("rofl") ).to.equal("lol");
 
 		});
 
-		it("Allows the use of a non-default collection for embedded collections", function(){
+		it("can dynamically create a collection with a pre-defined model from embeddeds", function(){
 
 			var Test = Model.extend({ defaults : { lol : "rofl"} });
 
-			var EmbeddedCollection = require('hyperbone-model').Collection.extend({
-				model : Test
-			});
-
-			var EmbedTest = Model.extend({ _prototypes : { "tests" : EmbeddedCollection }});
+			var EmbedTest = Model.extend({ _prototypes : { "tests" : Test }});
 
 			var m = new EmbedTest({
 				_links : {

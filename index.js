@@ -100,6 +100,18 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 		}, this);
 
+		if(attributes._embedded){
+
+			_.each(attributes._embedded, function(val, attr){
+
+				attributes[attr] = val;
+
+			});
+
+			delete attributes._embedded;
+
+		}
+
 		return attributes;
 
 	},
@@ -166,7 +178,13 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 				}
 
-				val = new Proto( _.extend(val, { _links: { self : { href : this.url() + "#" + attr}}} ) );
+				if(!val._links || !val._links.self || !val._links.self.href){
+
+					val = _.extend(val,  { _links: { self : { href : this.url() + "#" + attr}}})
+
+				}
+
+				val = new Proto( val );
 
 			}
 
@@ -215,7 +233,13 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 				_.each(val, function( element, id ){
 
-					elements.push(_.extend( element, { _links : { self : { href : this.url() + "#" + attr + "/" + id } } } ) );
+					if(!element._links || !element._links.self || !element._links.self.href){
+
+						element = _.extend( element,   { _links : { self : { href : this.url() + "#" + attr + "/" + id } } } );
+
+					}
+
+					elements.push( element );
 
 				}, this);
 
@@ -225,7 +249,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 					self.trigger("change:" + attr, this);
 
-				})
+				});
 
 				val = collection;
 
