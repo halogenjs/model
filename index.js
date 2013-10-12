@@ -1,14 +1,6 @@
 // Insert dramatic and exciting code here
 
-var Stub = function(){
-
-	return this;
-
-};
-
-Stub.prototype = {
+var HyperboneModel = require('backbone-model').Model;
 
 
-};
-
-module.exports.Stub = Stub;
+module.exports.Model = HyperboneModel;

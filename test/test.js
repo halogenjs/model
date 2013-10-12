@@ -1,13 +1,15 @@
+describe("Hyperbone model", function(){
 
-describe("suite", function(){
+	describe("Environment", function(){
 
-	it("is ready to go for tests", function(){
+		it("can require the hyperbone module", function(){
 
-		should.exist(describe);
-		should.exist(it);
-		should.exist(should);
-		should.exist(expect);
+			var Model = require('hyperbone-model').Model;
 
-	})
+			should.exist(Model);
 
-})
+		});
+
+	});
+
+});

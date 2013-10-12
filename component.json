@@ -4,7 +4,9 @@
   "description": "HAL extensions for Backbone Models",
   "version": "0.0.1",
   "keywords": [],
-  "dependencies": {},
+  "dependencies": {
+    "green-mesa/backbone-model": "*"
+  },
   "development": {},
   "license": "MIT",
   "scripts": [
