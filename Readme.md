@@ -9,13 +9,13 @@
 
   Well, at this point, Backbone sort of gets in your way a little. 
 
-  Hyperbone Model is a response to this: It takes only the useful bits of Backbone for Hypermedia - the Models, Collections and Event (helpfully extracted and made standalone [components](http://component.io) ) and adds Hypermedia extensions. This means that this particular component does not require jQuery. 
+  Hyperbone Model is a response to this: It takes only the useful bits of Backbone for Hypermedia - the Models, Collections and Event (for which we've refactored Backbone into discrete [components](http://component.io) ) and adds Hypermedia extensions. This means that this particular component does not require jQuery. 
 
   It is part of a larger framework for building client-side apps with Hypermedia.
   
 ## WARNING!
 
-  Because of the need to remove the jQuery dependency (in keeping with the component philosophy of not bundling huge libraries with components) the .sync functionality of the Backbone models has been disabled. It can be readded. See (backbone-sync)[http://github.com/green-mesa/backbone-sync]. 
+  Because of the need to remove the jQuery dependency (in keeping with the component philosophy of not bundling huge libraries with components) the .sync functionality of the Backbone models has been disabled. It can be readded. See [backbone-sync](http://github.com/green-mesa/backbone-sync). 
 
 ## Features
 
