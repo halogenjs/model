@@ -312,8 +312,8 @@ Hyperbone supports curie (and `curies` with an array, incidentally), and offers 
 
 ## Controls
 
-A foreword about controls. Hyperbone model adds another reserved property, "_controls" and offers some lightweight additional utility for those
-that care to use it. However, "_controls" is not part of the HAL Spec. Mike Kelly has said that dealing with forms will be part of a separate 
+A foreword about controls. Hyperbone model adds another reserved property, `_controls` and offers some lightweight additional utility for those
+that care to use it. However, `_controls` is not part of the HAL Spec. Mike Kelly has said that dealing with forms will be part of a separate 
 spec, however as we are in need of this functionality now, therefore it has been included in this.
 
 In effect controls are just JSON versions of forms, from which HTML forms can be generated (functionality NOT included in Hyperbone Model). Minimum 
@@ -369,7 +369,7 @@ If, as in the above example, you're using an internal rel for your controls, you
   model.control("controls:sample");
 ```
 
-The convention is that an internal rel to a control begins '#controls' or '#_controls' or '#control' and the path to the specific
+The convention is that an internal rel to a control begins `#controls` or `#_controls` or `#control` and the path to the specific
 control is separated by a slash. 
 
 
