@@ -8,7 +8,7 @@ describe("Hyperbone model", function(){
 
 			expect( Model ).to.be.ok;
 			expect( new Model({ _links: { self : { href : "/test"}}}) ).to.be.ok;
-			expect( function(){ return new Model({}) } ).to.throw("Invalid hypermedia: No self href");
+			expect( new Model({}) ).to.be.ok;
 
 		});
 
@@ -34,7 +34,7 @@ describe("Hyperbone model", function(){
 
 			expect( m.get("anObject").get("name") ).to.equal("name inside an object");
 			expect( m.get("anObject").get("description") ).to.equal("description inside an object");
-			expect( m.get("anObject").url() ).to.equal("/attribute-test#anObject");
+			expect( function(){m.get("anObject").url()} ).to.throw("Not a hypermedia resource");
 
 		});		
 
@@ -75,7 +75,7 @@ describe("Hyperbone model", function(){
 
 			expect( m.get("anArrayofObjects").length ).to.equal(3);
 			expect( m.get("anArrayofObjects").at(0).get("name") ).to.equal("obj 1");
-			expect( m.get("anArrayofObjects").at(0).url() ).to.equal("/attribute-test#anArrayofObjects/0");
+			expect( function(){ m.get("anArrayofObjects").at(0).url()} ).to.throw("Not a hypermedia resource");
 
 		});
 
@@ -282,5 +282,7 @@ describe("Hyperbone model", function(){
 
 
 	});
+
+	describe
 
 });

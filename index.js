@@ -59,17 +59,13 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 	parseHypermedia : function( attributes ){
 
-		if(!attributes || !attributes._links || !attributes._links.self || !attributes._links.self.href){
-			throw new Error("Invalid hypermedia: No self href");
-		}
-
 		// parse links
-		this._links = attributes._links;
+		this._links = attributes._links || {};
 		delete attributes._links;
 
 		this._curies = {};
 
-		var curies = (this._links['curie'] ? [this._links['curie']] : (this._links['curies'] ? this._links['curies'] : null));
+		var curies = (  this._links ? this._links['curie'] ? [this._links['curie']] : (this._links['curies'] ? this._links['curies'] : null) : null  );
 
 		if(curies){
 
@@ -118,175 +114,169 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 	url : function(){
 
-		return this._links.self.href;
+		if(this._links.self && this._links.self.href){
+
+			return this._links.self.href;
+
+		}
+
+		throw new Error("Not a hypermedia resource");
 
 	},
 
 	set: function(key, val, options) {
 
-	  var self = this;
+		var self = this;
 
-      var attr, attrs, unset, changes, silent, changing, prev, current, Proto;
-      if (key == null) return this;
+		var attr, attrs, unset, changes, silent, changing, prev, current, Proto;
+		if (key == null) return this;
 
-      // Handle both `"key", value` and `{key: value}` -style arguments.
-      if (typeof key === 'object') {
-        attrs = key;
-        options = val;
-      } else {
-        (attrs = {})[key] = val;
-      }
+		// Handle both `"key", value` and `{key: value}` -style arguments.
+		if (typeof key === 'object') {
+			attrs = key;
+			options = val;
+		} else {
+			(attrs = {})[key] = val;
+		}
 
-      options || (options = {});
+		options || (options = {});
 
-      // Run validation.
-      if (!this._validate(attrs, options)) return false;
+	  // Run validation.
+		if (!this._validate(attrs, options)) return false;
 
-      // Extract attributes and options.
-      unset           = options.unset;
-      silent          = options.silent;
-      changes         = [];
-      changing        = this._changing;
-      this._changing  = true;
+		// Extract attributes and options.
+		unset           = options.unset;
+		silent          = options.silent;
+		changes         = [];
+		changing        = this._changing;
+		this._changing  = true;
 
-      if (!changing) {
-        this._previousAttributes = _.clone(this.attributes);
-        this.changed = {};
-      }
-      current = this.attributes, prev = this._previousAttributes;
+		if (!changing) {
+			this._previousAttributes = _.clone(this.attributes);
+			this.changed = {};
+		}
+		current = this.attributes, prev = this._previousAttributes;
 
-      // Check for changes of `id`.
-      if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
+		// Check for changes of `id`.
+		if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
 
-      // For each `set` attribute, update or delete the current value
+		// For each `set` attribute, update or delete the current value
 
-      for (attr in attrs) {
+		for (attr in attrs) {
 
-        val = attrs[attr];
+	    	val = attrs[attr];
 
-        if(_.isObject(val) && !_.isArray(val)){
+	    	if(_.isObject(val) && !_.isArray(val)){
 
-			if(!val.isHyperbone){
+				if(!val.isHyperbone){
 
-				if(this._prototypes[attr]){
+					if(this._prototypes[attr]){
 
-					Proto = this._prototypes[attr];
+						Proto = this._prototypes[attr];
 
-				} else {
+					} else {
 
-					Proto = HyperboneModel;
-
-				}
-
-				if(!val._links || !val._links.self || !val._links.self.href){
-
-					val = _.extend(val,  { _links: { self : { href : this.url() + "#" + attr}}})
-
-				}
-
-				val = new Proto( val );
-
-			}
-
-			val.on("change", (function(attr){
-
-				return function(){
-
-					self.trigger('change:' + attr, this);
-					self.trigger('change', this);
-
-				}
-
-			}(attr)));
-
-		} else if(_.isArray(val)){
-
-			var containsJustObjects = true;
-
-			_.each(val, function( element ){
-
-				if(!_.isObject(element)) containsJustObjects = false;
-
-			});
-
-			if(containsJustObjects){
-
-				var elements = [];
-
-				if(this._prototypes[attr]){
-
-					Proto = this._prototypes[attr];
-
-				} else {
-
-					Proto = HyperboneModel;
-
-				}
-
-				var EmbeddedCollection = Collection.extend({
-
-					model : Proto
-
-				});
-
-				var collection = new EmbeddedCollection();
-
-				_.each(val, function( element, id ){
-
-					if(!element._links || !element._links.self || !element._links.self.href){
-
-						element = _.extend( element,   { _links : { self : { href : this.url() + "#" + attr + "/" + id } } } );
+						Proto = HyperboneModel;
 
 					}
 
-					elements.push( element );
+					val = new Proto( val );
 
-				}, this);
+				}
 
-				collection.add(elements);
+				val.on("change", (function(attr){
 
-				collection.on("change", function(){
+					return function(){
 
-					self.trigger("change:" + attr, this);
+						self.trigger('change:' + attr, this);
+						self.trigger('change', this);
+
+					}
+
+				}(attr)));
+
+			} else if(_.isArray(val)){
+
+				var containsJustObjects = true;
+
+				_.each(val, function( element ){
+
+					if(!_.isObject(element)) containsJustObjects = false;
 
 				});
 
-				val = collection;
+				if(containsJustObjects){
 
+					var elements = [];
+
+					if(this._prototypes[attr]){
+
+						Proto = this._prototypes[attr];
+
+					} else {
+
+						Proto = HyperboneModel;
+
+					}
+
+					var EmbeddedCollection = Collection.extend({
+
+						model : Proto
+
+					});
+
+					var collection = new EmbeddedCollection();
+
+					_.each(val, function( element, id ){
+
+						elements.push( element );
+
+					}, this);
+
+					collection.add(elements);
+
+					collection.on("change", function(){
+
+						self.trigger("change:" + attr, this);
+
+					});
+
+					val = collection;
+
+				}
+
+	    	}
+
+			if (!_.isEqual(current[attr], val)) changes.push(attr);
+			if (!_.isEqual(prev[attr], val)) {
+				this.changed[attr] = val;
+			} else {
+				delete this.changed[attr];
+			}
+			unset ? delete current[attr] : current[attr] = val;
+		}
+
+	  // Trigger all relevant attribute changes.
+		if (!silent) {
+			if (changes.length) this._pending = true;
+				for (var i = 0, l = changes.length; i < l; i++) {
+					this.trigger('change:' + changes[i], this, current[changes[i]], options);
+				}
 			}
 
-        }
-
-        if (!_.isEqual(current[attr], val)) changes.push(attr);
-        if (!_.isEqual(prev[attr], val)) {
-          this.changed[attr] = val;
-        } else {
-          delete this.changed[attr];
-        }
-        unset ? delete current[attr] : current[attr] = val;
-      }
-
-      // Trigger all relevant attribute changes.
-      if (!silent) {
-        if (changes.length) this._pending = true;
-        for (var i = 0, l = changes.length; i < l; i++) {
-          this.trigger('change:' + changes[i], this, current[changes[i]], options);
-        }
-      }
-
-      // You might be wondering why there's a `while` loop here. Changes can
-      // be recursively nested within `"change"` events.
-      if (changing) return this;
-      if (!silent) {
-        while (this._pending) {
-          this._pending = false;
-          this.trigger('change', this, options);
-        }
-      }
-      this._pending = false;
-      this._changing = false;
-      return this;
-    },
+		// You might be wondering why there's a `while` loop here. Changes can
+		// be recursively nested within `"change"` events.
+		if (changing) return this;
+		if (!silent) {
+			while (this._pending) {
+				this._pending = false;
+				this.trigger('change', this, options);
+			}
+		}
+		this._pending = false;
+		this._changing = false;
+		return this;
+	},
 
 	rel : function( rel, data ){
 
@@ -314,6 +304,12 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 
 		return this._links[rel].href ? this._links[rel].href : this._links[rel];
+
+	},
+
+	rels : function(){
+
+		return this._links;
 
 	},
 

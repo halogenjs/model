@@ -149,27 +149,33 @@ If you want to use a specific model, the API is as follows:
 
 This applies to _embedded and generic attributes.
 
-Incidentally, the nested, embedded models have their own url. (all hypermedia must have a self.href).
+The main difference between an model that comes from _embedded and one that's just inside the attributes is that _embedded models have a self.href
 
 ```javascript
-
-    var model = new Model({
-      _links : {
-        self : {
-          href : "/helloworld"
-        }
+  
+  var m = new Model({
+    _links : {
+      self : {
+        href : "/test"
       }
+    },
+    _embedded : {
+      "foo" : {
+        _links : {
+          self : {
+            href : "/foo/1"
+          }
+        }
+        "bar" : "kbo"
+      }
+    }
 
-    });
-    
-    model.set("test", { name : "one"});
+  });
 
-    expect( model.get("test").url() ).to.equal( "/helloworld#test" );
-``` 
+  expect( m.get("foo").url() ).to.equal("/foo/1"); // TRUE
 
-In practice this is just to fulfill the requirement that all Hypermedia resources must have a self.href and it is not expected that this
-would be used in the real world. But it's there. For models inside collections inside models, the URI goes model.url() + "#" + attribute name + "/" + index in collection of model.
-
+  
+```
 
 ### .url()
 
