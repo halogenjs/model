@@ -124,6 +124,37 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 	},
 
+	get: function(attr) {
+
+		if(this.attributes[attr]) return this.attributes[attr];
+
+			var parts = attr.split(".");
+
+			attr = parts.shift();
+
+			var remainder = parts.join('.')
+
+		if(this.attributes[attr]){
+
+			return this.attributes[attr].get( remainder );
+
+		} else {
+
+			parts = attr.match(/([a-zA-Z_]+)\[([0-9]+)\]/);
+
+			var index = parseInt(parts[2], 10);
+			attr = parts[1]
+
+			if(_.isNumber( index ) && this.attributes[attr]){
+
+				return this.attributes[ attr ].at( index ).get( remainder );
+
+			}
+
+		}
+
+    },
+
 	set: function(key, val, options) {
 
 		var self = this;

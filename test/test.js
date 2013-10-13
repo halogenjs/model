@@ -14,7 +14,7 @@ describe("Hyperbone model", function(){
 
 	});
 
-	describe("Attribute setting", function(){
+	describe("Attribute setting and getting", function(){
 		// built into hyperbone is the automatic nesting of objects and arrays of objects
 
 		var Model = require('hyperbone-model').Model;
@@ -93,6 +93,67 @@ describe("Hyperbone model", function(){
 			});
 
 			o.at(0).set("name", "lol I changed the name");
+
+		});
+
+		it("can return a nested attribute through dot notation", function(){
+
+			var m = new Model( useFixture('/attribute-test') );
+
+			expect( m.get("anObject.name") ).to.equal("name inside an object");
+
+		});
+
+		it("can return a model at an index in a collection through [0] notation", function(){
+
+			var m = new Model( useFixture('/attribute-test') );
+
+			expect( m.get("anArrayofObjects[0].name") ).to.equal("obj 1");
+
+		});
+
+		it("can deal with dot notation to access deeply nested models attributes", function(){
+
+			var m = new Model({
+				foo : {
+					bar : {
+						kbo : {
+							lol : "rofl!"
+						}
+					}					
+				}				
+			});
+
+			expect( m.get("foo.bar.kbo.lol") ).to.equal("rofl!");
+
+		});
+
+		it("can deal with dot and [n] notation to access deeply nested models attributes", function(){
+
+			var m = new Model({
+				foo : {
+					bar : [
+						{
+							kbo : {
+								lol : "rofl!"
+							}
+						},
+						{
+							kbo : {
+								lol : "haha!"
+							},
+						},
+						{
+							kbo : {
+								lol : "chuckles"
+							}
+						}
+					]
+				}
+			});
+
+			expect( m.get("foo.bar[1].kbo.lol") ).to.equal("haha!");
+			expect( m.get("foo.bar[2].kbo").get('lol') ).to.equal("chuckles");
 
 		});
 
@@ -201,6 +262,17 @@ describe("Hyperbone model", function(){
 			var m = new Model( useFixture('/services_curie') );
 
 			expect( m.rel("app:test") ).to.equal("/services/test");
+
+		});
+
+		it("returns all rels for self discovery purposes", function(){
+
+			var m = new Model( useFixture('/services_curie') );
+
+			var rels = m.rels();
+
+			expect( rels.self.href ).to.equal("/services");
+			expect( rels.curie.href ).to.equal("/services/rels/{rel}");
 
 		});
 

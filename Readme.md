@@ -61,10 +61,18 @@ cannot be initialised without this minimum data.
 
 ```
 
-### Setting prototypes in advance
+### .set( attr, data )
 
-By default all objects added as attributes to a model are converted into hyperbone models. Arrays of objects are automatically converted
-into Collections of Models. So..
+Usual Backbone .set(), but all objects added as attributes to a model are converted into hyperbone models. Arrays of objects are automatically converted
+into a backbone Collection of models, too.
+
+### .get( attr )
+
+Hyperbone extends the .get() method to allow dot notation to access these nested properties. The attribute names can be just about anything.
+
+### More about using get and set...
+
+The philosophy behind Hyperbone means resources are embeddable within resources which means it's models and collections all the way down. 
 
 Automatic models... 
 
@@ -81,7 +89,11 @@ Automatic models...
 
   model.set("test", { name : "Test", value : "Testing"});
 
+  // chaining...
   expect( model.get("test").get("name") ).to.equal("Test"); // TRUE
+
+  // or use the handy dot notation. This works for deeply nested models, too.
+  expect( model.get("test.name").to.equal("Test") ); // TRUE!
 
 ```
 
@@ -102,11 +114,18 @@ And automatic collections...
 
   expect( model.get("test").length ).to.equal( 3 ); // TRUE
 
+  // using chaining...
+  expect( model.get("test").at(0).get("name") ).to.equal("one"); // TRUE
+
+  // or using dot notation...
+  expect( model.get("test[0].name") ).to.equal("one"); // TRUE
+
+  // arrays of objects automatically get all the power of Backbone collections... 
   model.get("test").each(function( item ){
 
     console.log(item.get("name"));
 
-  })
+  });
 
   > one
   > two
@@ -277,10 +296,7 @@ Run the tests:
 
 - Non-standard to the HAL spec, but there will be _controls support for dealing with forms
 - Self-discovery of URI template requirements?
-- Accessing nested attributes with model.get("author/name") instead of model.get("author").get("name")
-- dealing with multiple levels of nesting
-- fixing the need to add urls() to nested models that do no represent a resource (and according to the Hal spec _links is optional so it shouldn't be throwing an error if invoked without.
-
+- Accessing nested attributes with model.get("author.name") instead of model.get("author").get("name")
 
 
 ## License
