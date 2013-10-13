@@ -377,6 +377,165 @@ describe("Hyperbone model", function(){
 
 	});
 
-	describe
+	describe("Controls", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it("does not add _controls as attributes - reserved property", function(){
+
+			var m = new Model( useFixture('/tasklist') );
+
+			expect( m.get("_controls") ).to.not.be.ok;
+
+		});
+
+		it("returns a control via a rel", function(){
+
+			var m = new Model( useFixture('/tasklist') );
+
+			expect( m.control("controls:create-new") ).to.be.ok;
+			expect( m.get("task[0]").control("controls:complete") ).to.be.ok;
+
+		});
+
+		it("supports single level of controls", function(){
+
+			var m = new Model({
+				_links : {
+					"controls:test" : {
+						href : "#_controls/edit"
+					}
+				},
+				_controls : {
+					edit : {
+						action : "/create",
+						method : "POST",
+						encoding : "application/x-www-form-urlencoded",
+						properties : [
+							{
+								name : "name",
+								type : "text"
+							},
+							{
+								name : "description",
+								type : "text"
+							}
+						]
+					}
+				}
+
+			}); 
+
+			expect( m.control("controls:test").get("action") ).to.equal("/create");
+
+		});
+
+		it("supports ridiculous levels of controls", function(){
+
+			var m = new Model({
+				_links : {
+					"controls:test" : {
+						href : "#_controls/edit/test/indirection"
+					}
+				},
+				_controls : {
+					edit : {
+						test : {
+							indirection : {
+								action : "/create",
+								method : "POST",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "name",
+										type : "text"
+									},
+									{
+										name : "description",
+										type : "text"
+									}
+								]
+							}
+						}
+					}
+				}
+
+			}); 
+
+			expect( m.control("controls:test").get("action") ).to.equal("/create");
+
+		});
+
+		it("returns supports multiple rel conventions", function(){
+
+			// not entirely sure what the spec is here. Personally believe that 
+			// internal rels should use a hash symbol, as it's a fragment.
+
+			var m = new Model({
+				_links : {
+					"controls:one" : {
+						href : "#_controls/edit/create"
+					},
+					"controls:two" : {
+						href : "#controls/edit/create"
+					},
+					"controls:three" : {
+						href : "#control/edit/create"
+					}
+				},
+				_controls : {
+					edit : {
+						create : {
+							action : "/create",
+							method : "POST",
+							encoding : "application/x-www-form-urlencoded",
+							properties : [
+								{
+									name : "name",
+									type : "text"
+								},
+								{
+									name : "description",
+									type : "text"
+								}
+							]
+						}
+
+					}
+				}
+
+			});
+
+			expect( m.control("controls:one").get("action") ).to.equal("/create");
+			expect( m.control("controls:one").get("properties").length ).to.equal(2);
+
+			expect( m.control("controls:two").get("action") ).to.equal("/create");
+			expect( m.control("controls:two").get("properties").length ).to.equal(2);
+
+			expect( m.control("controls:two").get("action") ).to.equal("/create");
+			expect( m.control("controls:two").get("properties").length ).to.equal(2);
+
+
+
+		});
+
+		it("returns a control via a direct reference", function(){
+
+			var m = new Model( useFixture('/tasklist') );
+
+			expect( m.control("edit.create-task") ).to.be.ok;
+			expect( m.get("task[0]").control("edit.edit-task") ).to.be.ok;
+
+		});
+
+		it("can be used to get a reference to a specific property", function(){
+
+			var m = new Model( useFixture('/tasklist') );
+
+			expect( m.control("controls:create-new").field("etag").get("value") ).to.equal("adefdfad34246736");
+
+		});
+
+	})
 
 });

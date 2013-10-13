@@ -415,8 +415,8 @@ var fixtures = {
 					description : "Do this task",
 					tasktype : "Default priority",
 					created : 1381580070704,
-					last_updated : 1381580103672,
-					etag : "adefdfad34246736",
+					last_updated : 1381679058602,
+					etag : "1758475ecdacdeacddecac",
 					_controls : {
 						edit : {
 							"complete-yet-another-type-of-task" : {
@@ -427,7 +427,7 @@ var fixtures = {
 									{
 										name : "etag",
 										type : "hidden",
-										value : "adefdfad34246736"
+										value : "1758475ecdacdeacddecac"
 									},
 									{
 										name : "submit",
@@ -445,7 +445,7 @@ var fixtures = {
 									{
 										name : "etag",
 										type : "hidden",
-										value : "adefdfad34246736"
+										value : "1758475ecdacdeacddecac"
 									},
 									{
 										name : "submit",
@@ -489,7 +489,7 @@ var fixtures = {
 									{
 										name : "etag",
 										type : "hidden",
-										value : "adefdfad34246736"
+										value : "1758475ecdacdeacddecac"
 									},
 									{
 										name : "submit",
@@ -505,8 +505,7 @@ var fixtures = {
 				}
 			]
 		}
-	},
-
+	}
 
 };
 

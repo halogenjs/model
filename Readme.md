@@ -310,7 +310,95 @@ Hyperbone supports curie (and `curies` with an array, incidentally), and offers 
   expect( model.fullyQualitiedRel( "rofl:test" ) ).to.equal("http://www.helloworld.com/rels/test"); // TRUE
 ```
 
+## Controls
 
+A foreword about controls. Hyperbone model adds another reserved property, "_controls" and offers some lightweight additional utility for those
+that care to use it. However, "_controls" is not part of the HAL Spec. Mike Kelly has said that dealing with forms will be part of a separate 
+spec, however as we are in need of this functionality now, therefore it has been included in this.
+
+In effect controls are just JSON versions of forms, from which HTML forms can be generated (functionality NOT included in Hyperbone Model). Minimum 
+requirements to be seen as a control by Hyperbone are a "method" property and a "properties" property. If there is no "action" property it will automatically
+be assigned the self.href of the parent resource.
+
+In the trivial example below it is hard to get a sense of the use of this. However, imagine if every possible interaction with your resource has one of these 
+controls. It would then be feasible to generate a fully functioning client-side application (albeit hideously ugly) from the JSON HAL alone. 
+
+That's the goal. 
+
+Adding a control:
+
+```javascript
+  new Model({
+    _links : {
+      self : {
+        href : "/thing"
+      },
+      "controls:sample" : {
+        href : "#controls/edit/sample"
+      }
+    },
+    _controls : {
+      edit : {
+        sample : {
+          method : "PUT",
+          action : "/thing/sample",
+          properties : [
+            {
+              type : "text",
+              name : "description",
+              value : "the current description"
+            },
+            {
+              type : "submit",
+              name : ""
+            }
+          ]
+        }
+      }
+    }
+
+  })
+
+```
+
+### .control( [rel / id] )
+
+If, as in the above example, you're using an internal rel for your controls, you can access the control with:
+
+```javascript
+  model.control("controls:sample");
+```
+
+The convention is that an internal rel to a control begins '#controls' or '#_controls' or '#control' and the path to the specific
+control is separated by a slash. 
+
+
+Or you can access using .get() style dot notation, but this is not recommended - better to have a consistent interface for a particular 
+type of resource as depending on your server side implementation, control names may not be predictable in advance.
+
+```javascript
+  model.control("edit.sample");
+```
+
+This returns the control as a Hyperbone Model, so all the usual stuff applies - the array of properties becomes a collection, etc.
+
+```javascript
+  model.control("controls:sample").get("properties").each(function(field){
+
+    // do something with each property in the control.
+
+  })
+```
+
+### .field( fieldName )
+
+A utility function allowing you to access a specific field directly. NOTE this does not give you access to any generated HTML form field
+as this is not part of this module, but when you change any value an event is issued as normal and anything subscribing to this can react
+accordingly.
+
+```javascript
+  model.control("controls:sample").field("description").get("value") === "the current description"; // true
+```
 
 ## Testing
 
@@ -328,12 +416,6 @@ Run the tests:
 ```bash
   $ grunt test
 ```
-
-## To Do
-
-- Non-standard to the HAL spec, but there will be _controls support for dealing with forms
-- Self-discovery of URI template requirements?
-- Accessing nested attributes with model.get("author.name") instead of model.get("author").get("name")
 
 
 ## License

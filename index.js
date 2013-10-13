@@ -14,6 +14,8 @@ var Collection = require('backbone-collection').Collection.extend({
 });
 var makeTemplate = require('uritemplate').parse;
 
+var HyperboneControl = null;
+
 var HyperboneModel = function(attributes, options){
 
 	// we override the initial function because we need to force a hypermedia parse at the
@@ -58,6 +60,8 @@ var HyperboneModel = function(attributes, options){
 _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 	parseHypermedia : function( attributes ){
+
+		var self = this;
 
 		// parse links
 		this._links = attributes._links || {};
@@ -108,6 +112,46 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 		}
 
+		if(attributes._controls){
+
+			this._controls = {};
+
+			var findControls;
+
+			findControls = function( obj ){
+
+				var temp = {};
+
+				_.each(obj, function( o, id ){
+
+					if(o.method && o.properties){
+
+						temp[id] = new HyperboneControl(o);
+
+						if(!o.action){
+
+							temp[id].set( "action", self.url(), { silent : true});
+
+						}
+
+					} else {
+
+						temp[id] = findControls(o);
+
+					}
+
+					
+
+				});
+
+				return temp;
+
+			}
+
+			this._controls = new HyperboneModel( findControls( attributes._controls ) );
+			delete attributes._controls;			
+		}
+
 		return attributes;
 
 	},
@@ -126,7 +170,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 	get: function(attr) {
 
-		if(this.attributes[attr]) return this.attributes[attr];
+		if(this.attributes[attr]){ 
+
+			return this.attributes[attr];
+
+		} else if(_.indexOf(attr, '.')!==-1 || /([a-zA-Z_]+)\[([0-9]+)\]/.test(attr) ){
 
 			var parts = attr.split(".");
 
@@ -134,32 +182,37 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 			var remainder = parts.join('.')
 
-		if(this.attributes[attr]){
+			if(this.attributes[attr]){
 
-			return this.attributes[attr].get( remainder );
+				return this.attributes[attr].get( remainder );
 
-		} else {
+			} else {
 
-			parts = attr.match(/([a-zA-Z_]+)\[([0-9]+)\]/);
+				parts = attr.match(/([a-zA-Z_]+)\[([0-9]+)\]/);
 
-			var index = parseInt(parts[2], 10);
-			attr = parts[1]
+				var index = parseInt(parts[2], 10);
+				attr = parts[1]
 
-			if(_.isNumber( index ) && this.attributes[attr]){
+				if(_.isNumber( index ) && this.attributes[attr]){
 
-				if(remainder){
+					if(remainder){
 
-					return this.attributes[ attr ].at( index ).get( remainder );
+						return this.attributes[ attr ].at( index ).get( remainder );
 
-				}else{
+					}else{
 
-					return this.attributes[ attr ].at( index );
+						return this.attributes[ attr ].at( index );
+
+					}
 
 				}
 
 			}
 
+
 		}
+
+		return null;
 
     },
 
@@ -371,11 +424,49 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 		return this._curies[ parts[0] ].expand({ rel : parts[1] })
 
+	},
+
+	control : function( key ){
+
+		var control;
+
+		if(this._links[key]){
+
+			var parts = this._links[key].href.split(/\//g);
+
+			if(parts[0]==="#controls" || parts[0]==="#_controls" || parts[0]==="#control"){
+
+				parts = parts.slice(1);
+
+			}
+
+			control = this._controls.get( parts.join('.') );
+
+		} else {
+
+			control = this._controls.get( key );
+
+		}
+
+		if(control) return control;
+
+		return null;
+
 	}
 
 });
 
 HyperboneModel.extend = BackboneModel.extend;
+
+HyperboneControl = HyperboneModel.extend({
+
+	field : function(key){
+
+		return this.get("properties").findWhere({ name : key });
+
+	}
+
+});
 
 module.exports.Model = HyperboneModel;
 module.exports.Collection = Collection;
