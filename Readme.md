@@ -1,24 +1,34 @@
-
 # Hyperbone Model
 
   [Backbone](http://backbonejs.org/) Models with [Hypermedia](http://stateless.co/hal_specification.html) Extensions. 
 
-  Classic Backbone models are basically [Active Record](http://en.wikipedia.org/wiki/Active_record_pattern). It's REST level 2. You have a resource and you can do GET, POST, PUT, DELETE on it.
-  Awesome. But what if you're using a [REST level 3](http://www.crummy.com/writing/speaking/2008-QCon/act3.html) API? What if you're using Hypermedia?
+  Backbone models are [Active Record](http://en.wikipedia.org/wiki/Active_record_pattern). You have a resource and you can do GET, POST, PUT, DELETE on it.
 
-  What if you want your API to be self discoverable? What if the controls to interact with a resource aren't on the same uri as your resource?
+  Awesome. 
 
-  Well, at this point, Backbone sort of gets in your way a little. 
+But what if you're using a [REST level 3](http://www.crummy.com/writing/speaking/2008-QCon/act3.html) API? What if you're using a hypermedia Web API? What if your API is using JSON HAL?
 
-  Hyperbone Model is a response to this: It takes the useful bits of Backbone for Hypermedia - the Models, Collections and Event (helpfully extracted and made standalone [components](http://component.io) ) and adds Hypermedia extensions.
+  What if you want your API to be self discoverable? What if there are ways of interacting with your resource that aren't on the same uri? 
 
-  It is part of a larger framework for building client-side apps with Hypermedia.
+  Well, at this point, Backbone gets in your way. I know from painful experience.
+
+  Hyperbone Model is a response to this: It takes only the relevant bits of Backbone - the Models, Collections and Event (for which we've refactored Backbone into discrete [components](http://component.io) ) and adds Hypermedia extensions to them. This means that this particular component does not require jQuery, and means you can use a custom or just different router, Ajax component and view component.
+
+Hyperbone Model also takes care of nesting models and collections. By default Backbone models are a single object of key value pairs. In the hypermedia world where resources can be nested inside other resources, we need to ensure all the Backbone utility is available from top to bottom.
+
+  It is part of a larger framework for building client-side apps based on HAL Web APIs. The roadmap, such as it is, involves extending Hyperbone model with _controls (JSON representation of forms) and a View component to project complex Hyperbone models onto templates. Initially there will be some basic _control -> html stuff, but this will be extendable with components that will add features like "render in bootstrap friendly way" or "just a single button" or "project form through custom template" etc.
+  
+## WARNING!
+
+  Because of the need to remove the jQuery dependency (in keeping with the component philosophy of not bundling huge libraries with components) the .sync functionality of the Backbone models has been disabled. It can be readded. See [backbone-sync](http://github.com/green-mesa/backbone-sync). 
+  
+  In practice this will not be replaced. Hypermedia interactions are either read only (in the form of a self-discoverable API) or via controls (embedded forms). Sync is basically 'reload' and little more. It's likely that this functionality will be moved somewhere else and the Models themselves will not be responsible for loading themselves.
 
 ## Features
 
   - _links support, with 'self' mapped to .url()
   - Curie support with fully qualified rel uri lookup for curied rels
-  - support for uri templating to RFC6570, thanks to (Franz Antesberger)[https://github.com/ericgj/uritemplate] )
+  - support for uri templating to RFC6570, thanks to https://github.com/ericgj/uritemplate
   - automatic mapping of _embedded data to attributes
   - automatic conversion of objects and arrays of objects to models and collections (including from _embedded) with events cascaded to the parent
   - ability to assign specific Model prototypes for use with specific attributes with custom _prototypes attribute.
@@ -196,7 +206,7 @@ Shortcut to .rel('self');
 ### .rel( rel [, data])
 
 Get a link to another rel of the resource. If a particular rel is a URI template and `templated: true` is set, then rel
-can be used to expand the uri template with the data. There is no particular way of evaluating. 
+can be used to expand the uri template with the data. There is currently no way of discovering the requirements for a URI template - it's on the to-do list.
 
 ```javascript
   var model = new Model({
@@ -267,6 +277,9 @@ Run the tests:
 
 - Non-standard to the HAL spec, but there will be _controls support for dealing with forms
 - Self-discovery of URI template requirements?
+- Accessing nested attributes with model.get("author/name") instead of model.get("author").get("name")
+- dealing with multiple levels of nesting
+- fixing the need to add urls() to nested models that do no represent a resource (and according to the Hal spec _links is optional so it shouldn't be throwing an error if invoked without.
 
 
 
