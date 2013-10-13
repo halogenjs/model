@@ -117,7 +117,7 @@ And automatic collections...
   // using chaining...
   expect( model.get("test").at(0).get("name") ).to.equal("one"); // TRUE
 
-  // or using dot notation...
+  // or using dot notation and very basic indexing for collections...
   expect( model.get("test[0].name") ).to.equal("one"); // TRUE
 
   // arrays of objects automatically get all the power of Backbone collections... 
@@ -246,7 +246,12 @@ can be used to expand the uri template with the data. There is currently no way 
   expect( model.rel( "self" ) ).to.equal("/helloworld"); // TRUE
   expect( model.rel( "test" ) ).to.equal("/test"); // TRUE
   expect( model.rel( "clever", { id : "lol"} ) ).to.equal("/clever/lol"); // TRUE
+
+
 ```
+### .rels()
+
+Returns all the links. Hypermedia is about self discovery, after all. 
 
 ### .fullyQualifiedRel( rel )
 
