@@ -44,8 +44,8 @@ Hyperbone Model also takes care of nesting models and collections. By default Ba
 
 ### Creating a model
 
-Creating a hyperbone model. The minimum valid HAL document contains a _links object, which contains a link to 'self'. A Hyperbone model
-cannot be initialised without this minimum data.
+Creating a hyperbone model. The minimum valid HAL document contains a _links object, but according to the spec is this optional, so you can invoke a 
+hyperbone model with an empty object.
 
 ```javascript
   var Model = require('hyperbone-model').Model;
@@ -66,9 +66,41 @@ cannot be initialised without this minimum data.
 Usual Backbone .set(), but all objects added as attributes to a model are converted into hyperbone models. Arrays of objects are automatically converted
 into a backbone Collection of models, too.
 
+Setting can be done via chaining of these models 
+
+```javascript
+// nested models means no more breaking out of Backbone
+m.get('thing').get('nestedthing').set("property", "hello")
+```
+
+or through dot notation
+
+```javascript
+m.set("thing.nestedthing.property", "hello");
+
+//  internally this does... 
+//  {
+//    thing : {
+//      nestedthing : { 
+//        property : "hello"
+//      }
+//    }  
+//  }
+```
+
+This has obvious implications - you can't, by default, use attribute names with periods in. You can, however, disabled this functionality
+
+```javascript
+m.set("foo.bar.lol", "hello", { ignoreDotNotation: true });
+// creates an attribute called "foo.bar.lol" in model m.
+
+```
+
 ### .get( attr )
 
-Hyperbone extends the .get() method to allow dot notation to access these nested properties. The attribute names can be just about anything.
+Hyperbone extends the .get() method to allow dot notation and indexed access notation to access these nested properties. The attribute names can be just about anything.
+
+The dot notation feature is just basic string manipulation and recursive calls to .get(), and obviously you can always fall back to basic chaining if there's an issue - although reports of issues are welcome.
 
 ### More about using get and set...
 
@@ -117,7 +149,7 @@ And automatic collections...
   // using chaining...
   expect( model.get("test").at(0).get("name") ).to.equal("one"); // TRUE
 
-  // or using dot notation and very basic indexing for collections...
+  // or using dot notation and indexed access notiation...
   expect( model.get("test[0].name") ).to.equal("one"); // TRUE
 
   // arrays of objects automatically get all the power of Backbone collections... 

@@ -147,7 +147,15 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 			if(_.isNumber( index ) && this.attributes[attr]){
 
-				return this.attributes[ attr ].at( index ).get( remainder );
+				if(remainder){
+
+					return this.attributes[ attr ].at( index ).get( remainder );
+
+				}else{
+
+					return this.attributes[ attr ].at( index );
+
+				}
 
 			}
 
@@ -159,7 +167,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 		var self = this;
 
-		var attr, attrs, unset, changes, silent, changing, prev, current, Proto;
+		var attr, attrs, unset, changes, silent, changing, prev, current, Proto, parts;
 		if (key == null) return this;
 
 		// Handle both `"key", value` and `{key: value}` -style arguments.
@@ -180,6 +188,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 		silent          = options.silent;
 		changes         = [];
 		changing        = this._changing;
+		ignoreDotNotation = options.ignoreDotNotation || false;
 		this._changing  = true;
 
 		if (!changing) {
@@ -195,88 +204,100 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 		for (attr in attrs) {
 
-	    	val = attrs[attr];
+			if(_.indexOf(attr, ".") !== -1 && !ignoreDotNotation){
 
-	    	if(_.isObject(val) && !_.isArray(val)){
+				parts = attr.split('.');
+				attr = parts.pop();
+				var path = parts.join('.');
 
-				if(!val.isHyperbone){
+				this.get(path).set(attr, val);
 
-					if(this._prototypes[attr]){
+			} else {
 
-						Proto = this._prototypes[attr];
+		    	val = attrs[attr];
 
-					} else {
+		    	if(_.isObject(val) && !_.isArray(val)){
 
-						Proto = HyperboneModel;
+					if(!val.isHyperbone){
 
-					}
+						if(this._prototypes[attr]){
 
-					val = new Proto( val );
+							Proto = this._prototypes[attr];
 
-				}
+						} else {
 
-				val.on("change", (function(attr){
+							Proto = HyperboneModel;
 
-					return function(){
+						}
 
-						self.trigger('change:' + attr, this);
-						self.trigger('change', this);
-
-					}
-
-				}(attr)));
-
-			} else if(_.isArray(val)){
-
-				var containsJustObjects = true;
-
-				_.each(val, function( element ){
-
-					if(!_.isObject(element)) containsJustObjects = false;
-
-				});
-
-				if(containsJustObjects){
-
-					var elements = [];
-
-					if(this._prototypes[attr]){
-
-						Proto = this._prototypes[attr];
-
-					} else {
-
-						Proto = HyperboneModel;
+						val = new Proto( val );
 
 					}
 
-					var EmbeddedCollection = Collection.extend({
+					val.on("change", (function(attr){
 
-						model : Proto
+						return function(){
+
+							self.trigger('change:' + attr, this);
+							self.trigger('change', this);
+
+						}
+
+					}(attr)));
+
+				} else if(_.isArray(val)){
+
+					var containsJustObjects = true;
+
+					_.each(val, function( element ){
+
+						if(!_.isObject(element)) containsJustObjects = false;
 
 					});
 
-					var collection = new EmbeddedCollection();
+					if(containsJustObjects){
 
-					_.each(val, function( element, id ){
+						var elements = [];
 
-						elements.push( element );
+						if(this._prototypes[attr]){
 
-					}, this);
+							Proto = this._prototypes[attr];
 
-					collection.add(elements);
+						} else {
 
-					collection.on("change", function(){
+							Proto = HyperboneModel;
 
-						self.trigger("change:" + attr, this);
+						}
 
-					});
+						var EmbeddedCollection = Collection.extend({
 
-					val = collection;
+							model : Proto
+
+						});
+
+						var collection = new EmbeddedCollection();
+
+						_.each(val, function( element, id ){
+
+							elements.push( element );
+
+						}, this);
+
+						collection.add(elements);
+
+						collection.on("change", function(){
+
+							self.trigger("change:" + attr, this);
+
+						});
+
+						val = collection;
+
+					}
 
 				}
 
-	    	}
+		    }
 
 			if (!_.isEqual(current[attr], val)) changes.push(attr);
 			if (!_.isEqual(prev[attr], val)) {

@@ -128,13 +128,20 @@ var fixtures = {
 		_links : {
 			self : {
 				href : "/tasklist"
+			},
+			curie : {
+				name : "controls",
+				href : "/tasklist#controls/{rel}",
+				templated : true
+			},
+			"controls:create-new" : {
+				href : "#controls/edit/create-task"
 			}
 		},
-		Count : 5,
+		Count : 3,
 		_controls : {
-			edit : [
-				{
-					name : "create-task",
+			edit : {
+				"create-task" : {
 					action : "/tasklist/create",
 					method : "POST",
 					encoding : "application/x-www-form-urlencoded",
@@ -158,7 +165,8 @@ var fixtures = {
 						}
 					]
 				}
-			]
+
+			}
 		},
 		_embedded : {
 			"task" : [
@@ -167,77 +175,110 @@ var fixtures = {
 						self : {
 							href: "/tasks/1"
 						},
-						description : "Do this task",
-						created : 1381580070704,
-						last_updated : 1381580103672,
-						etag : "adefdfad34246736",
-						_controls : {
-							edit : [
-								{
-									name : "complete-task",
-									action : "/tasks/1/complete",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "adefdfad34246736"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Complete"
-										}
-									]
-								},
-								{
-									name : "delete-task",
-									action : "/tasks/1/delete",
-									method : "DELETE",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "adefdfad34246736"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Delete"
-										}
-									]
+						curie : {
+							name : "controls",
+							href : "/tasks/1#controls/{rel}",
+							templated : true
+						},
+						"controls:complete" : {
+							href : '#controls/edit/complete-some-task'
+						},
+						"controls:edit" : {
+							href : '#controls/edit/edit-task'
+						},
+						"controls:delete" : {
+							href : '#controls/edit/delete-task'
+						},
+					},
+					description : "Do this task",
+					tasktype : "Default priority",
+					created : 1381580070704,
+					last_updated : 1381580103672,
+					etag : "adefdfad34246736",
+					_controls : {
+						edit : {
+							"complete-some-task" : {
+								action : "/tasks/1/complete",
+								method : "PUT",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "etag",
+										type : "hidden",
+										value : "adefdfad34246736"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Complete"
+									}
+								]
+							},
+							"delete-task" : {
+								name : "delete-task",
+								action : "/tasks/1/delete",
+								method : "DELETE",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "etag",
+										type : "hidden",
+										value : "adefdfad34246736"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Delete"
+									}
+								]
 
-								},
-								{
-									name : "edit-task",
-									action : "/tasks/1/edit",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "description",
-											type : "text",
-											value : "Do this task",
-											placeholder : "Add description here",
-											required : "required"
-										},
-										{
-											name : "etag",
-											type : "hidden",
-											value : "adefdfad34246736"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Save"
-										}
-									]
+							},
+							"edit-task" : {
+								action : "/tasks/1/edit",
+								method : "PUT",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "description",
+										type : "text",
+										value : "Do this task",
+										placeholder : "Add description here",
+										required : "required"
+									},
+									{
+										name : "tasktype",
+										type : "select",
+										options : [
+											{
+												name : "Default priority",
+												value : "default",
+												selected : "selected"
+											},
+											{
+												name : "Urgent",
+												value : "urgent"
+											},
+											{
+												name : "File 13",
+												value : "ignore"
+											}
+										]
+									},
+									{
+										name : "etag",
+										type : "hidden",
+										value : "adefdfad34246736"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Save"
+									}
+								]
 
-								}
-							]
+							}
 						}
+	
 					}
 				},
 				{
@@ -245,77 +286,110 @@ var fixtures = {
 						self : {
 							href: "/tasks/2"
 						},
-						description : "Do this other task",
-						created : 1381580103672,
-						last_updated : 1381580103672,
-						etag : "aeeefdfeef12376517623",
-						_controls : {
-							edit : [
-								{
-									name : "complete-task",
-									action : "/tasks/2/complete",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "aeeefdfeef12376517623"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Complete"
-										}
-									]
-								},
-								{
-									name : "delete-task",
-									action : "/tasks/2/delete",
-									method : "DELETE",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "aeeefdfeef12376517623"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Delete"
-										}
-									]
+						curie : {
+							name : "controls",
+							href : "/tasks/2#controls/{rel}",
+							templated : true
+						},
+						"controls:complete" : {
+							href : '#controls/edit/complete-different-kind-of-task'
+						},
+						"controls:edit" : {
+							href : '#controls/edit/edit-task'
+						},
+						"controls:delete" : {
+							href : '#controls/edit/delete-task'
+						},
+					},
+					description : "Put the lotion in the basket",
+					tasktype : "Urgent",
+					created : 1381666804016,
+					last_updated : 1381666804016,
+					etag : "dadadcecdcadcecdcdcaec",
+					_controls : {
+						edit : {
+							"complete-different-kind-of-task" : {
+								action : "/tasks/2/complete",
+								method : "PUT",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "etag",
+										type : "hidden",
+										value : "dadadcecdcadcecdcdcaec"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Complete"
+									}
+								]
+							},
+							"delete-task" : {
+								name : "delete-task",
+								action : "/tasks/1/delete",
+								method : "DELETE",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "etag",
+										type : "hidden",
+										value : "dadadcecdcadcecdcdcaec"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Delete"
+									}
+								]
 
-								},
-								{
-									name : "edit-task",
-									action : "/tasks/2/edit",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "description",
-											type : "text",
-											value : "Do this other task",
-											placeholder : "Add description here",
-											required : "required"
-										},
-										{
-											name : "etag",
-											type : "hidden",
-											value : "aeeefdfeef12376517623"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Save"
-										}
-									]
+							},
+							"edit-task" : {
+								action : "/tasks/1/edit",
+								method : "PUT",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "description",
+										type : "text",
+										value : "Put the lotion in the basket",
+										placeholder : "Add description here",
+										required : "required"
+									},
+									{
+										name : "tasktype",
+										type : "select",
+										options : [
+											{
+												name : "Default",
+												value : "default"
+											},
+											{
+												name : "Urgent",
+												value : "urgent",
+												selected : "selected"
+											},
+											{
+												name : "File 13",
+												value : "ignore"
+											}
+										]
+									},
+									{
+										name : "etag",
+										type : "hidden",
+										value : "dadadcecdcadcecdcdcaec"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Save"
+									}
+								]
 
-								}
-							]
+							}
 						}
+	
 					}
 				},
 				{
@@ -323,233 +397,110 @@ var fixtures = {
 						self : {
 							href: "/tasks/3"
 						},
-						description : "Put the lotion in the basket",
-						created : 1381580070704,
-						last_updated : 1381580070704,
-						etag : "adbcaecbfabcdbfcabecd",
-						_controls : {
-							edit : [
-								{
-									name : "complete-task",
-									action : "/tasks/3/complete",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "adbcaecbfabcdbfcabecd"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Complete"
-										}
-									]
-								},
-								{
-									name : "delete-task",
-									action : "/tasks/3/delete",
-									method : "DELETE",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "adbcaecbfabcdbfcabecd"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Delete"
-										}
-									]
-
-								},
-								{
-									name : "edit-task",
-									action : "/tasks/3/edit",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "description",
-											type : "text",
-											value : "Put the lotion in the basket",
-											placeholder : "Add description here",
-											required : "required"
-										},
-										{
-											name : "etag",
-											type : "hidden",
-											value : "adbcaecbfabcdbfcabecd"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Save"
-										}
-									]
-
-								}
-							]
-						}
-					}
-				},
-				{
-					_links : {
-						self : {
-							href: "/tasks/4"
+						curie : {
+							name : "controls",
+							href : "/tasks/3#controls/{rel}",
+							templated : true
 						},
-						description : "Make fetch happen",
-						created : 1381580103672,
-						last_updated : 1381580103672,
-						etag : "dccbacdcccbdcbacbedcbceabdcab",
-						_controls : {
-							edit : [
-								{
-									name : "complete-task",
-									action : "/tasks/4/complete",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "dccbacdcccbdcbacbedcbceabdcab"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Complete"
-										}
-									]
-								},
-								{
-									name : "delete-task",
-									action : "/tasks/4/delete",
-									method : "DELETE",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "dccbacdcccbdcbacbedcbceabdcab"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Delete"
-										}
-									]
-
-								},
-								{
-									name : "edit-task",
-									action : "/tasks/4/edit",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "description",
-											type : "text",
-											value : "Make fetch happen",
-											placeholder : "Add description here",
-											required : "required"
-										},
-										{
-											name : "etag",
-											type : "hidden",
-											value : "dccbacdcccbdcbacbedcbceabdcab"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Save"
-										}
-									]
-
-								}
-							]
-						}
-					}
-				},
-				{
-					_links : {
-						self : {
-							href: "/tasks/5"
+						"controls:complete" : {
+							href : '#controls/edit/complete-yet-another-type-of-task'
 						},
-						description : "Finish making stupid hyperbone fixtures",
-						created : 1381580103672,
-						last_updated : 1381580103672,
-						etag : "cebcebcbfbcebcbfbfbcbbaaabcbebf",
-						_controls : {
-							edit : [
-								{
-									name : "complete-task",
-									action : "/tasks/5/complete",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "cebcebcbfbcebcbfbfbcbbaaabcbebf"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Complete"
-										}
-									]
-								},
-								{
-									name : "delete-task",
-									action : "/tasks/5/delete",
-									method : "DELETE",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "etag",
-											type : "hidden",
-											value : "cebcebcbfbcebcbfbfbcbbaaabcbebf"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Delete"
-										}
-									]
-
-								},
-								{
-									name : "edit-task",
-									action : "/tasks/5/edit",
-									method : "PUT",
-									encoding : "application/x-www-form-urlencoded",
-									properties : [
-										{
-											name : "description",
-											type : "text",
-											value : "Finish making stupid hyperbone fixtures",
-											placeholder : "Add description here",
-											required : "required"
-										},
-										{
-											name : "etag",
-											type : "hidden",
-											value : "cebcebcbfbcebcbfbfbcbbaaabcbebf"
-										},
-										{
-											name : "submit",
-											type : "submit",
-											value : "Save"
-										}
-									]
-
-								}
-							]
+						"controls:edit" : {
+							href : '#controls/edit/edit-task'
+						},
+						"controls:delete" : {
+							href : '#controls/edit/delete-task'
 						}
+					},
+					description : "Do this task",
+					tasktype : "Default priority",
+					created : 1381580070704,
+					last_updated : 1381580103672,
+					etag : "adefdfad34246736",
+					_controls : {
+						edit : {
+							"complete-yet-another-type-of-task" : {
+								action : "/tasks/3/complete",
+								method : "PUT",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "etag",
+										type : "hidden",
+										value : "adefdfad34246736"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Complete"
+									}
+								]
+							},
+							"delete-task" : {
+								name : "delete-task",
+								action : "/tasks/3/delete",
+								method : "DELETE",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "etag",
+										type : "hidden",
+										value : "adefdfad34246736"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Delete"
+									}
+								]
+
+							},
+							"edit-task" : {
+								action : "/tasks/3/edit",
+								method : "PUT",
+								encoding : "application/x-www-form-urlencoded",
+								properties : [
+									{
+										name : "description",
+										type : "text",
+										value : "Do this task",
+										placeholder : "Add description here",
+										required : "required"
+									},
+									{
+										name : "tasktype",
+										type : "select",
+										options : [
+											{
+												name : "Default priority",
+												value : "default",
+												selected : "selected"
+											},
+											{
+												name : "Urgent",
+												value : "urgent"
+											},
+											{
+												name : "File 13",
+												value : "ignore"
+											}
+										]
+									},
+									{
+										name : "etag",
+										type : "hidden",
+										value : "adefdfad34246736"
+									},
+									{
+										name : "submit",
+										type : "submit",
+										value : "Save"
+									}
+								]
+
+							}
+						}
+	
 					}
 				}
 			]

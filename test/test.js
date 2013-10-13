@@ -42,8 +42,6 @@ describe("Hyperbone model", function(){
 
 			var m = new Model( useFixture('/attribute-test') );
 
-			var o = m.get("anObject");
-
 			m.on("change", function(){
 
 				expect( m.get("anObject").get("name") ).to.equal("lol I changed the name");
@@ -52,7 +50,7 @@ describe("Hyperbone model", function(){
 
 			});
 
-			o.set("name", "lol I changed the name");
+			m.get("anObject").set("name", "lol I changed the name");
 
 		});
 
@@ -108,6 +106,8 @@ describe("Hyperbone model", function(){
 
 			var m = new Model( useFixture('/attribute-test') );
 
+			expect( m.get("anArrayofObjects[0]").get("name") ).to.equal("obj 1");
+
 			expect( m.get("anArrayofObjects[0].name") ).to.equal("obj 1");
 
 		});
@@ -127,6 +127,28 @@ describe("Hyperbone model", function(){
 			expect( m.get("foo.bar.kbo.lol") ).to.equal("rofl!");
 
 		});
+
+		it("can deal with dot notation to set deeply nested models attributes", function(){
+
+			var m = new Model({
+				foo : {
+					bar : {
+						kbo : {
+							lol : "rofl!"
+						}
+					}					
+				}				
+			});
+
+			m.set("foo.bar.kbo.lol", "hello");
+
+			// by default this creates a new attribute called 'foo.bar.kbo.lol' 
+			// so to test this we need to access it via chaining to make sure
+			// the correct object has been set
+			expect( m.get("foo.bar.kbo").get("lol") ).to.equal("hello");
+
+		});
+
 
 		it("can deal with dot and [n] notation to access deeply nested models attributes", function(){
 
