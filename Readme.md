@@ -200,7 +200,7 @@ Shortcut to .rel('self');
 ### .rel( rel [, data])
 
 Get a link to another rel of the resource. If a particular rel is a URI template and `templated: true` is set, then rel
-can be used to expand the uri template with the data. There is no particular way of evaluating. 
+can be used to expand the uri template with the data. There is currently no way of discovering the requirements for a URI template - it's on the to-do list.
 
 ```javascript
   var model = new Model({
@@ -271,6 +271,9 @@ Run the tests:
 
 - Non-standard to the HAL spec, but there will be _controls support for dealing with forms
 - Self-discovery of URI template requirements?
+- Accessing nested attributes with model.get("author/name") instead of model.get("author").get("name")
+- dealing with multiple levels of nesting
+- fixing the need to add urls() to nested models that do no represent a resource (and according to the Hal spec _links is optional so it shouldn't be throwing an error if invoked without.
 
 
 
