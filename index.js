@@ -50,7 +50,7 @@ var HyperboneModel = function(attributes, options){
     attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
     // need to override the set method, methinks.
-    this.set(attributes, {silent: true});
+    this.set(attributes, {silent : true});
 
     this.changed = {};
     this.initialize.apply(this, arguments);
@@ -253,7 +253,33 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 		// Check for changes of `id`.
 		if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
 
-		// For each `set` attribute, update or delete the current value
+
+		// Recursively call set on nested models and collections
+		_.each(attrs, function(value, key){
+
+			if(_.isObject(value) && current[key] && current[key].isHyperbone){
+
+				if(_.isArray(value)){
+
+					// we're adding to a collection
+					_.each(value, function( model, index){
+
+						current[key].at(index).set( model );
+
+					});
+
+					delete attrs[key];
+
+				}else{
+
+					current[key].set(value);
+					delete attrs[key];
+				}
+
+			}
+			
+		});
+	
 
 		for (attr in attrs) {
 
@@ -284,6 +310,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 						}
 
 						val = new Proto( val );
+
+						val._parent = self;
 
 					}
 
@@ -330,6 +358,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 						var collection = new EmbeddedCollection();
 
+						collection._parent = self;
+
 						_.each(val, function( element, id ){
 
 							elements.push( element );
@@ -360,6 +390,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 			}
 			unset ? delete current[attr] : current[attr] = val;
 		}
+
+	
 
 	  // Trigger all relevant attribute changes.
 		if (!silent) {

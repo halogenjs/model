@@ -179,6 +179,28 @@ describe("Hyperbone model", function(){
 
 		});
 
+		it("It updates nested models, not overwriting, allowing events to be triggered", function(done){
+
+			var m = new Model({
+				foo : {
+					bar : {
+						kbo : "lol"
+					}					
+				}				
+			});
+
+			m.get("foo.bar").on("change:kbo", function(){
+
+				expect( m.get("foo.bar.kbo") ).to.equal("rofl");
+
+				done();
+
+			});
+
+			m.set({ foo : { bar : { kbo : "rofl"}}});
+
+		});
+
 	});
 
 	describe("Embedding", function(){
