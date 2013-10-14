@@ -5,8 +5,8 @@
   "version": "0.0.1",
   "keywords": [],
   "dependencies": {
-    "green-mesa/backbone-model": "*",
-    "green-mesa/backbone-collection": "*",
+    "green-mesa/backbone-model": "1.0.0",
+    "green-mesa/backbone-collection": "1.0.0",
     "components/underscore": "1.4.4",
     "ericgj/uritemplate": "*"
   },
