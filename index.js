@@ -375,7 +375,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 						});
 
 						val = collection;
-
+						
 					}
 
 				}

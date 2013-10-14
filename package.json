@@ -1,14 +1,14 @@
 {
-  "name": "component-skeleton",
+  "name": "hyperbone-model",
   "version": "0.0.1",
-  "description": "A skeleton component with grunt support",
+  "description": "Hyperbone model",
   "main": "index.js",
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt install && grunt build && grunt test"
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/charlottegore/component-skeleton"
+    "url": "http://github.com/green-mesa/hyperbone-model"
   },
   "keywords": [
     "grunt"
@@ -20,7 +20,7 @@
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-shell": "~0.4.0",
     "grunt-contrib-watch": "~0.5.3",
-    "component": "~0.17.6",
+    "component": "0.17.4",
     "chai": "~1.8.0",
     "mocha": "~1.13.0"
   },
