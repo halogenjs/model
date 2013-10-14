@@ -12,7 +12,7 @@ module.exports = function(grunt){
 		},
 		shell : {
 			install : {
-				command : './node_modules/.bin/component install'	,
+				command : './node_modules/.bin/component install',
 				options : {
 					stdout : true,
 					stderr : true
@@ -67,6 +67,6 @@ module.exports = function(grunt){
 	grunt.registerTask('build-win', 'shell:buildWin');
 
 	grunt.registerTask("install-build-test", ["shell:install", "shell:build", "mocha_phantomjs"]);
-	
+
 	grunt.registerTask('test', 'mocha_phantomjs');
 }

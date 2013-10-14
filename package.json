@@ -4,7 +4,7 @@
   "description": "Hyperbone model",
   "main": "index.js",
   "scripts": {
-    "test": "grunt install && grunt build && grunt test"
+    "test": "grunt install-build-test"
   },
   "repository": {
     "type": "git",
