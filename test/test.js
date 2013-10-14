@@ -201,6 +201,35 @@ describe("Hyperbone model", function(){
 
 		});
 
+		it("It updates models inside nested collections, not overwriting, allowing events to be triggered", function(done){
+
+			var m = new Model({
+				foo : [
+					{
+						bar : {
+							kbo : "lol"
+						}	
+					},
+					{
+						bar : {
+							kbo : "haha"							
+						}						
+					}
+				]						
+			});
+
+			m.get("foo[0].bar").on("change:kbo", function(){
+
+				expect( m.get("foo[0].bar.kbo") ).to.equal("rofl");
+
+				done();
+
+			});
+
+			m.set({ foo : [ { bar : { kbo : "rofl"} } , { bar : { kbo : "chuckles"} } ] });
+
+		});
+
 	});
 
 	describe("Embedding", function(){
