@@ -63,10 +63,12 @@ hyperbone model with an empty object.
 
 ```
 
-### .set( attr, data )
+### .set( attr, data, options )
 
 Usual Backbone .set(), but all objects added as attributes to a model are converted into hyperbone models. Arrays of objects are automatically converted
 into a backbone Collection of models, too.
+
+To prevent this behaviour (to make it behave rather like generic Backbone) use `{noTraverse : true}` in options. 
 
 Setting can be done via chaining of these models 
 
@@ -96,6 +98,12 @@ This has obvious implications - you can't, by default, use attribute names with 
 m.set("foo.bar.lol", "hello", { ignoreDotNotation: true });
 // creates an attribute called "foo.bar.lol" in model m.
 
+```
+
+Preventing recursive traversal (i.e, for DOM elements or anything with cyclical references)
+
+```javascript
+  m.set("body", document.getElementsByTagName('body')[0], { noTraverse: true });
 ```
 
 ### .get( attr )
