@@ -241,7 +241,10 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 		silent          = options.silent;
 		changes         = [];
 		changing        = this._changing;
+
+		noTraverse 		= options.noTraverse || false;
 		ignoreDotNotation = options.ignoreDotNotation || false;
+
 		this._changing  = true;
 
 		if (!changing) {
@@ -297,7 +300,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 		    	if(_.isObject(val) && !_.isArray(val)){
 
-					if(!val.isHyperbone){
+					if(!val.isHyperbone && !noTraverse){
 
 						if(this._prototypes[attr]){
 
@@ -315,16 +318,20 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 					}
 
-					val.on("change", (function(attr){
+					if(val.on){
 
-						return function(){
+						val.on("change", (function(attr){
 
-							self.trigger('change:' + attr, this);
-							self.trigger('change', this);
+							return function(){
 
-						}
+								self.trigger('change:' + attr, this);
+								self.trigger('change', this);
 
-					}(attr)));
+							}
+
+						}(attr)));
+
+					}
 
 				} else if(_.isArray(val)){
 

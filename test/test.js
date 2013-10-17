@@ -230,6 +230,38 @@ describe("Hyperbone model", function(){
 
 		});
 
+		it("Doesn't traverse into models, just copies a reference", function(){
+
+			var m = new Model({
+				foo : {
+					bar : {
+						kbo : "lol"
+					}					
+				}				
+			});
+
+			var b = new Model({
+				cake : {
+					lie : "true"
+				}								
+			});
+
+			expect( m.set("sub", { el : "hello",  }) ).to.be.ok;
+
+		});
+
+		it("allows traversing into objects to be disabled with options.", function(){
+
+			var m = new Model({});
+
+			var body = document.getElementsByTagName('body')[0];
+
+			m.set("body", body, { noTraverse : true});
+
+			expect( m.get("body") ).to.equal(body);
+
+		});
+
 	});
 
 	describe("Embedding", function(){
