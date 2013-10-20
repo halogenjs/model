@@ -124,9 +124,9 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 				_.each(obj, function( o, id ){
 
-					if(o.method && o.properties){
+					if(o.method){
 
-						temp[id] = new HyperboneControl(o);
+						temp[id] = new HyperboneModel(o);
 
 						if(!o.action){
 
@@ -496,16 +496,6 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 });
 
 HyperboneModel.extend = BackboneModel.extend;
-
-HyperboneControl = HyperboneModel.extend({
-
-	field : function(key){
-
-		return this.get("properties").findWhere({ name : key });
-
-	}
-
-});
 
 module.exports.Model = HyperboneModel;
 module.exports.Collection = Collection;
