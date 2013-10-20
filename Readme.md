@@ -322,123 +322,49 @@ Hyperbone supports curie (and `curies` with an array, incidentally), and offers 
 
 ## Controls
 
-A foreword about controls. Hyperbone model adds another reserved property, `_controls` and offers some lightweight additional utility for those that care to use it. However, `_controls` is not part of the HAL Spec and is a Hyperbone specific thing. Mike Kelly has said that dealing with forms will be part of a separate spec, however as we are in need of this functionality now, therefore it has been included in this.
+Not part of the HAL Spec, but added to Hyperbone Model is some basic support for Hypermedia Controls, using the reserved property `_controls`.
 
-The spec for controls has not been finalised yet, but the current thinking is that `_controls` should be simple _semantic_ JSON representation of a form. It looks very similar to a straight HTML->JSON conversion but without any additional layout HTML and with a few additional reserved properties for supporting childNodes and textNodes.
+Controls are a JSON representation of forms, allowing the HAL document to define all the possible interactions with a resource (including those to a different URI than the resource itself)
 
-Because the intention is that this JSON will only hold semantic information about the form, the following are the supported tags:
+All this module does to assist is reserve the `_controls` keyword and offer a handy shortcut for pulling out individual control from a HAL document via an internal rel.
 
-  - input
-  - select
-  - fieldset
-  - textarea
-  - legend
-  - optgroup
-  - option
-  - button
-  - datalist
-  - keygen
-  - output
+In practice your control JSON can be anything you want if you're handling it yourself, however there is a specific module with a specific spec for automatically transforming these controls into fully two-way bound styleable html. See [Hyperbone Form](https://github.com/green-mesa/hyperbone-form) for more details. 
 
-Note that `<label />` is _not_ a supported tag.
-
-In addition each field object has some special reserved properties, in the style of HAL: `_text` and `_options` and `_label`. 
-
-`_text` is for declaring innerText for a field (textarea, legend, option). `_options` is for declaring nested options on select, datalist etc. (or optgroups with, itself, an `_options` property). 
-
-`_label` is for defining a default label, independently of the eventually generated HTML. 
-
-### Example control
-
-```javascript
-{
+```js
+ {
   _links : {
-    "controls:test" : {
-       href : "#_controls/test"
+    "controls:create-new" : { // the internal rel for this control is "controls:create-new"
+      href : "#_controls/create" // interla uri
+    }
+  },
+  _controls : { // special _controls property
+    create : {
+      method : "POST",
+      action : "/thing/create",
+      encoding : "application/x-form-www-urlencoding",
+      properties : [
+        // ... details of the form here
+      ]
     }
   }
-}
-{
-  _controls : {
-    test : {
-     {
-        method : "/testform",
-        action : "POST",
-        encoding : "x-form-www-url-encoded",
-        properties : [
-          {
-            input : {
-              name : "text-input",
-              value : "",
-              placeholder : "Insert text here",
-              _label : "Text control"
-            }
-          },
-          {
-            fieldset : [
-              {
-                legend : {
-                  _text : "Select controls"
-                }
-              },
-              {
-                select : {
-                  name : "select-control",
-                  value : "1",
-                  _label : "Select control"
-                  _options : [
-                    {
-                      option : {
-                        _text : "Option 1",
-                        value : "1"
-                      }
-                    },
-                    {
-                      option : {
-                        _text : "Option 2",
-                        value : "2"
-                      }
-                    },       
-                  ]
-                }
-              }
-            }
-          ]
-        ]
-      }
-    }
-  
-  }
-}
+ }
 ```
 
 ### .control( [rel / id] )
 
-If, as in the above example, you're using an internal rel for your controls, you can access the control with:
+Get the control via rel or via dot notation.
 
 ```javascript
-  model.control("controls:test");
+  model.control("controls:create-new");
+  
 ```
-
-The convention is that an internal rel to a control begins `#controls` or `#_controls` or `#control` and the path to the specific control is separated by a slash. 
-
-
-Or you can access using .get() style dot notation, but this is not recommended - better to have a consistent interface for a particular 
-type of resource as depending on your server side implementation, control names may not be predictable in advance.
 
 ```javascript
-  model.control("edit.sample");
+  model.control("create");
 ```
 
-This returns the control as a Hyperbone Model, so all the usual stuff applies - the array of properties becomes a collection, etc.
+The convention is that an internal rel to a control can begin `#controls` or `#_controls` or `#control` and the path to the specific control is separated by a slash. 
 
-```javascript
-  model.control("controls:sample").get("properties").each(function(field){
-
-    // do something with each property in the control.
-
-  })
-```
 
 ## Testing
 
