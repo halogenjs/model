@@ -611,14 +611,6 @@ describe("Hyperbone model", function(){
 
 		});
 
-		it("can be used to get a reference to a specific property", function(){
-
-			var m = new Model( useFixture('/tasklist') );
-
-			expect( m.control("controls:create-new").field("etag").get("value") ).to.equal("adefdfad34246736");
-
-		});
-
 	})
 
 });
