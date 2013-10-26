@@ -44,6 +44,8 @@ Nested [Backbone](http://backbonejs.org/) models with special support for [JSON 
 
 ## Installation
 
+Because Hyperbone is written in components, all the dependencies this module needs are installed with it. You do not need to include Backbone.js and Underscore.JS separately. Hyperbone Model actually makes use of a version of Backbone that has been refactored into separate components so that only the necessary parts are loaded. 
+
   Install with [component(1)](http://component.io):
 
     $ component install green-mesa/hyperbone-model
