@@ -264,6 +264,70 @@ describe("Hyperbone model", function(){
 
 	});
 
+	describe("To JSON", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it("Successfully serialises itself back to JSON", function(){
+
+			var m = new Model({
+				_links : {
+					self : {
+						href : '/tojson.test'
+					}
+				},
+				_embedded : {
+					"thing" : {
+						name : "A thing",
+						description: "Hello"
+					}
+				},
+				stuff : [
+					{
+						name : "hi",
+						value : 1234
+					},
+					{
+						name : "howdy",
+						value : 4352
+					}
+				],
+				test : "Hello",
+				lol : {
+					brand : "google",
+					app : "mail"
+				}
+			})
+
+			var json = m.toJSON();
+
+			expect(m.toJSON()).to.deep.equal({
+				thing : {
+					name : "A thing",
+					description : "Hello"
+				},
+				stuff : [
+					{
+						name : "hi",
+						value : 1234
+					},
+					{
+						name : "howdy",
+						value : 4352
+					}
+				],
+				test : "Hello",
+				lol : {
+					brand : "google",
+					app : "mail"
+				}
+			})
+
+		})
+
+
+	})
+
 	describe("Embedding", function(){
 
 		var Model = require('hyperbone-model').Model;

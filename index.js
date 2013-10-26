@@ -10,7 +10,19 @@
 var _ = require('underscore');
 var BackboneModel = require('backbone-model').Model;
 var Collection = require('backbone-collection').Collection.extend({
-	isHyperbone : true	
+	isHyperbone : true,
+	toJSON : function(){
+		var arr = [];
+		_.each(this.models, function(model, index){
+			if(model.isHyperbone){
+				arr.push(model.toJSON());
+			}else{	
+				arr.push(model);
+			}
+
+		})
+		return arr;
+	}
 });
 var makeTemplate = require('uritemplate').parse;
 
@@ -153,6 +165,23 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 		}
 
 		return attributes;
+
+	},
+
+	toJSON : function(){
+
+		var obj = {};
+		_.each(this.attributes, function(attr, key){
+
+			if (attr.isHyperbone){
+				obj[key] = attr.toJSON();
+			} else {
+				obj[key] = attr;
+			}
+
+		}, this);
+
+		return obj;
 
 	},
 
