@@ -2,38 +2,44 @@
 
 [![Build Status](https://travis-ci.org/green-mesa/hyperbone-model.png?branch=master)](https://travis-ci.org/green-mesa/hyperbone-model)
 
-  [Backbone](http://backbonejs.org/) Models with [Hypermedia](http://stateless.co/hal_specification.html) Extensions. 
+## tldr;
 
-  Backbone models are [Active Record](http://en.wikipedia.org/wiki/Active_record_pattern). You have a resource and you can do GET, POST, PUT, DELETE on it.
+Nested [Backbone](http://backbonejs.org/) models with special support for [JSON HAL](http://stateless.co/hal_specification.html) and JSON Hypermedia Controls. 
 
-  Awesome. 
+## Intro
 
-But what if you're using a [REST level 3](http://www.crummy.com/writing/speaking/2008-QCon/act3.html) API? What if you're using a hypermedia Web API? What if your API is using JSON HAL?
+  Default Backbone models are [Active Record](http://en.wikipedia.org/wiki/Active_record_pattern). You have a resource and you can do CRUD operations on it and that's great. "Getting your truth out of the DOM" is true and rich, complex client-side applications can be built.
 
-  What if you want your API to be self discoverable? What if there are ways of interacting with your resource that aren't on the same uri? 
+  The problem is for REST Level 3 - Hypermedia documents - Backbone's simple CRUD model isn't enough. You load a resource, and that resource can have many related uris (For example a 'book' resource may contain a link to the related 'author' resource), it can have other resources embedded within it (e.g, our 'book' resource could have 'pages' embedded) and finally it could have hypermedia controls to interact with that resource __that do not point to the same uri as the original resource__. For example, our 'book' resource may have a control to add a page, and a page may have a control to delete itself from the book and so on.
 
-  Well, at this point, Backbone gets in your way. I know from painful experience.
+  Rich REST level 3 Hypermedia APIs become, in effect, a complete expression of your application in their own right. 
 
-  Hyperbone Model is a response to this: It takes only the relevant bits of Backbone - the Models, Collections and Event (for which we've refactored Backbone into discrete [components](http://component.io) ) and adds Hypermedia extensions to them. This means that this particular component does not require jQuery, and means you can use a custom or just different router, Ajax component and view component.
+  __Hyperbone__ extends the flip out of Backbone to attempt to support HAL properly, to make building client-side applications consuming Hypermedia APIs as painless as possible. It's more opinionated than standard Backbone (out of necessity), but as this is a modular framework you only use the modules you need and that fit with the way you work.
 
-Hyperbone Model also takes care of nesting models and collections. By default Backbone models are a single object of key value pairs. In the hypermedia world where resources can be nested inside other resources, we need to ensure all the Backbone utility is available from top to bottom.
+  To this end, the roadmap for Hyperbone is as follows:
 
-  It is part of a larger framework for building client-side apps based on HAL Web APIs. The roadmap, such as it is, involves extending Hyperbone model with _controls (JSON representation of forms) and a View component to project complex Hyperbone models onto templates. Initially there will be some basic _control -> html stuff, but this will be extendable with components that will add features like "render in bootstrap friendly way" or "just a single button" or "project form through custom template" etc.
+  - __Hyperbone Model__ : Nested Backbone models that support Hypermedia natively, supporting uri templates, rels, controls and embedded resources
+  - __Hyperbone Form__ : Generating two-way bound HTML forms from JSON Controls. 
+  - __Hyperbone View__ : Binding Hyperbone Models to the DOM
+  - __Hyperbone IO__ : HTTP and Web Socket interactions for Hyperbone Models.
+  - __Hyperbone App__ : Convention based routing
+
+  Currently the first two have been completed, App has been stubbed out. Work is progressing on View. 
+
   
 ## WARNING!
 
-  Because of the need to remove the jQuery dependency (in keeping with the component philosophy of not bundling huge libraries with components) the .sync functionality of the Backbone models has been disabled. It can be readded. See [backbone-sync](http://github.com/green-mesa/backbone-sync). 
-  
-  In practice this will not be replaced. Hypermedia interactions are either read only (in the form of a self-discoverable API) or via controls (embedded forms). Sync is basically 'reload' and little more. It's likely that this functionality will be moved somewhere else and the Models themselves will not be responsible for loading themselves.
+  To remove the jQuery dependency and because Models in Hyperbone are not Active Records, the .sync() and .fetch() functionality has been stripped out. Changes to models are via controls, which are forms that are submitted to a server. HTTP interactions will be handled by the IO module (in development)
 
 ## Features
 
-  - _links support, with 'self' mapped to .url()
+  - _links support, with 'self' mapped to `.url()`
+  - Related links support with handy `.rels()` method
   - Curie support with fully qualified rel uri lookup for curied rels
   - support for uri templating to RFC6570, thanks to https://github.com/ericgj/uritemplate
-  - automatic mapping of _embedded data to attributes
-  - automatic conversion of objects and arrays of objects to models and collections (including from _embedded) with events cascaded to the parent
-  - ability to assign specific Model prototypes for use with specific attributes with custom _prototypes attribute.
+  - automatic mapping of _embedded data to model attributes
+  - True nesting, with support for dot notation access and ability to bind to events on nested attributes.
+  - ability to assign custom Model prototypes for use with specific attributes with custom _prototypes attribute.
 
 
 ## Installation
@@ -46,8 +52,7 @@ Hyperbone Model also takes care of nesting models and collections. By default Ba
 
 ### Creating a model
 
-Creating a hyperbone model. The minimum valid HAL document contains a _links object, but according to the spec is this optional, so you can invoke a 
-hyperbone model with an empty object.
+Creating a hyperbone model. The minimum valid HAL document contains a _links object, but according to the spec is this optional, so you can create a hyperbone model instance with an empty object.
 
 ```javascript
   var Model = require('hyperbone-model').Model;
@@ -63,17 +68,20 @@ hyperbone model with an empty object.
 
 ```
 
+### .toJSON()
+
+Backbone's toJSON method has had a bit of a facelift here so that the nested models and collections can be converted back to a straight JSON object.
+
+Note that this is not the full or original hypermedia document, rather a JSON representation of the current attributes of the model.  
+
 ### .set( attr, data, options )
 
-Usual Backbone .set(), but all objects added as attributes to a model are converted into hyperbone models. Arrays of objects are automatically converted
-into a backbone Collection of models, too.
-
-To prevent this behaviour (to make it behave rather like generic Backbone) use `{noTraverse : true}` in options. 
+Usual Backbone .set(), but supports nesting of models and collections. This is handled automatically. To prevent this behaviour (to make it behave rather like generic Backbone) use `{noTraverse : true}` in options. 
 
 Setting can be done via chaining of these models 
 
 ```javascript
-// nested models means no more breaking out of Backbone
+// nested models means being able to bind to changes for nested models
 m.get('thing').get('nestedthing').set("property", "hello")
 ```
 
@@ -92,7 +100,7 @@ m.set("thing.nestedthing.property", "hello");
 //  }
 ```
 
-This has obvious implications - you can't, by default, use attribute names with periods in. You can, however, disabled this functionality
+Support for dot notation means that you can't have attribute names with full stops. An additional option has been provided to deal with this:
 
 ```javascript
 m.set("foo.bar.lol", "hello", { ignoreDotNotation: true });
@@ -108,7 +116,7 @@ Preventing recursive traversal (i.e, for DOM elements or anything with cyclical 
 
 ### .get( attr )
 
-Hyperbone extends the .get() method to allow dot notation and indexed access notation to access these nested properties. The attribute names can be just about anything.
+Hyperbone extends the .get() method to allow dot notation and indexed access notation to access these nested properties.
 
 The dot notation feature is just basic string manipulation and recursive calls to .get(), and obviously you can always fall back to basic chaining if there's an issue - although reports of issues are welcome.
 
@@ -328,7 +336,7 @@ Controls are a JSON representation of forms, allowing the HAL document to define
 
 All this module does to assist is reserve the `_controls` keyword and offer a handy shortcut for pulling out individual control from a HAL document via an internal rel.
 
-In practice your control JSON can be anything you want if you're handling it yourself, however there is a specific module with a specific spec for automatically transforming these controls into fully two-way bound styleable html. See [Hyperbone Form](https://github.com/green-mesa/hyperbone-form) for more details. 
+In practice your control JSON can be anything you want if you're handling it yourself, however there is a specific module with a specific spec for automatically transforming JSON controls into fully two-way bound styleable html form. See [Hyperbone Form](https://github.com/green-mesa/hyperbone-form) for more details. 
 
 ```js
  {
@@ -342,7 +350,7 @@ In practice your control JSON can be anything you want if you're handling it you
       method : "POST",
       action : "/thing/create",
       encoding : "application/x-form-www-urlencoding",
-      properties : [
+      _children : [
         // ... details of the form here
       ]
     }
