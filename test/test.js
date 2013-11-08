@@ -42,7 +42,7 @@ describe("Hyperbone model", function(){
 
 			var m = new Model( useFixture('/attribute-test') );
 
-			m.on("change", function(){
+			m.on("change:anObject", function(){
 
 				expect( m.get("anObject").get("name") ).to.equal("lol I changed the name");
 
