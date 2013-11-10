@@ -130,19 +130,19 @@ var fixtures = {
 				href : "/tasklist"
 			},
 			curie : {
-				name : "controls",
-				href : "/tasklist#controls/{rel}",
+				name : "cmds",
+				href : "/tasklist/{rel}",
 				templated : true
 			},
-			"controls:create-new" : {
-				href : "#controls/edit/create-task"
+			"cmds:create-new" : {
+				href : "#_commands/edit/create-task"
 			}
 		},
 		Count : 3,
-		_controls : {
+		_commands : {
 			edit : {
 				"create-task" : {
-					action : "/tasklist/create",
+					href : "/tasklist/create",
 					method : "POST",
 					encoding : "application/x-www-form-urlencoded",
 					properties : [
@@ -176,18 +176,18 @@ var fixtures = {
 							href: "/tasks/1"
 						},
 						curie : {
-							name : "controls",
-							href : "/tasks/1#controls/{rel}",
+							name : "cmds",
+							href : "/tasks/1/rels/{rel}",
 							templated : true
 						},
-						"controls:complete" : {
-							href : '#controls/edit/complete-some-task'
+						"cmds:complete" : {
+							href : '#_commands/edit/complete-some-task'
 						},
-						"controls:edit" : {
-							href : '#controls/edit/edit-task'
+						"cmds:edit" : {
+							href : '#_commands/edit/edit-task'
 						},
-						"controls:delete" : {
-							href : '#controls/edit/delete-task'
+						"cmds:delete" : {
+							href : '#_commands/edit/delete-task'
 						},
 					},
 					description : "Do this task",
@@ -195,10 +195,10 @@ var fixtures = {
 					created : 1381580070704,
 					last_updated : 1381580103672,
 					etag : "adefdfad34246736",
-					_controls : {
+					_commands : {
 						edit : {
 							"complete-some-task" : {
-								action : "/tasks/1/complete",
+								href : "/tasks/1/complete",
 								method : "PUT",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [
@@ -215,7 +215,7 @@ var fixtures = {
 								]
 							},
 							"delete-task" : {
-								name : "delete-task",
+								href : "delete-task",
 								action : "/tasks/1/delete",
 								method : "DELETE",
 								encoding : "application/x-www-form-urlencoded",
@@ -234,7 +234,7 @@ var fixtures = {
 
 							},
 							"edit-task" : {
-								action : "/tasks/1/edit",
+								href : "/tasks/1/edit",
 								method : "PUT",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [
@@ -287,18 +287,18 @@ var fixtures = {
 							href: "/tasks/2"
 						},
 						curie : {
-							name : "controls",
-							href : "/tasks/2#controls/{rel}",
+							name : "cmds",
+							href : "/tasks/2/rels/{rel}",
 							templated : true
 						},
-						"controls:complete" : {
-							href : '#controls/edit/complete-different-kind-of-task'
+						"cmds:complete" : {
+							href : '#_commands/edit/complete-different-kind-of-task'
 						},
-						"controls:edit" : {
-							href : '#controls/edit/edit-task'
+						"cmds:edit" : {
+							href : '#_commands/edit/edit-task'
 						},
-						"controls:delete" : {
-							href : '#controls/edit/delete-task'
+						"cmds:delete" : {
+							href : '#_commands/edit/delete-task'
 						},
 					},
 					description : "Put the lotion in the basket",
@@ -306,10 +306,10 @@ var fixtures = {
 					created : 1381666804016,
 					last_updated : 1381666804016,
 					etag : "dadadcecdcadcecdcdcaec",
-					_controls : {
+					_commands : {
 						edit : {
 							"complete-different-kind-of-task" : {
-								action : "/tasks/2/complete",
+								href : "/tasks/2/complete",
 								method : "PUT",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [
@@ -326,7 +326,7 @@ var fixtures = {
 								]
 							},
 							"delete-task" : {
-								name : "delete-task",
+								href : "delete-task",
 								action : "/tasks/1/delete",
 								method : "DELETE",
 								encoding : "application/x-www-form-urlencoded",
@@ -345,7 +345,7 @@ var fixtures = {
 
 							},
 							"edit-task" : {
-								action : "/tasks/1/edit",
+								href : "/tasks/1/edit",
 								method : "PUT",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [
@@ -398,18 +398,18 @@ var fixtures = {
 							href: "/tasks/3"
 						},
 						curie : {
-							name : "controls",
-							href : "/tasks/3#controls/{rel}",
+							name : "cmds",
+							href : "/tasks/3/rels/{rel}",
 							templated : true
 						},
-						"controls:complete" : {
-							href : '#controls/edit/complete-yet-another-type-of-task'
+						"cmds:complete" : {
+							href : '#_commands/edit/complete-yet-another-type-of-task'
 						},
-						"controls:edit" : {
-							href : '#controls/edit/edit-task'
+						"cmds:edit" : {
+							href : '#_commands/edit/edit-task'
 						},
-						"controls:delete" : {
-							href : '#controls/edit/delete-task'
+						"cmds:delete" : {
+							href : '#_commands/edit/delete-task'
 						}
 					},
 					description : "Do this task",
@@ -417,10 +417,10 @@ var fixtures = {
 					created : 1381580070704,
 					last_updated : 1381679058602,
 					etag : "1758475ecdacdeacddecac",
-					_controls : {
+					_commands : {
 						edit : {
 							"complete-yet-another-type-of-task" : {
-								action : "/tasks/3/complete",
+								href : "/tasks/3/complete",
 								method : "PUT",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [
@@ -437,8 +437,7 @@ var fixtures = {
 								]
 							},
 							"delete-task" : {
-								name : "delete-task",
-								action : "/tasks/3/delete",
+								href : "/tasks/3/delete",
 								method : "DELETE",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [
@@ -456,7 +455,7 @@ var fixtures = {
 
 							},
 							"edit-task" : {
-								action : "/tasks/3/edit",
+								href : "/tasks/3/edit",
 								method : "PUT",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [

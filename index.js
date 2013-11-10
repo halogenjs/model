@@ -26,8 +26,6 @@ var Collection = require('backbone-collection').Collection.extend({
 });
 var makeTemplate = require('uritemplate').parse;
 
-var HyperboneControl = null;
-
 var HyperboneModel = function(attributes, options){
 
   // we override the initial function because we need to force a hypermedia parse at the
@@ -124,13 +122,13 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     }
 
-    if(attributes._controls){
+    if(attributes._commands){
 
-      this._controls = {};
+      this._commands = {};
 
-      var findControls;
+      var findCommands;
 
-      findControls = function( obj ){
+      findCommands = function( obj ){
 
         var temp = {};
 
@@ -140,15 +138,15 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
             temp[id] = new HyperboneModel(o);
 
-            if(!o.action){
+            if(!o.href){
 
-              temp[id].set( "action", self.url(), { silent : true});
+              temp[id].set("href", self.url(), { silent : true});
 
             }
 
           } else {
 
-            temp[id] = findControls(o);
+            temp[id] = findCommands(o);
 
           }
 
@@ -160,8 +158,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       }
 
-      this._controls = new HyperboneModel( findControls( attributes._controls ) );
-      delete attributes._controls;      
+      this._commands = new HyperboneModel( findCommands( attributes._commands ) );
+      delete attributes._commands;      
     }
 
     return attributes;
@@ -493,33 +491,33 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     var parts = rel.split(":");
 
-    return this._curies[ parts[0] ].expand({ rel : parts[1] })
+    return this._curies[ parts[0] ].expand({ rel : parts[1] });
 
   },
 
-  control : function( key ){
+  command : function( key ){
 
-    var control;
+    var command;
 
     if(this._links[key]){
 
       var parts = this._links[key].href.split(/\//g);
 
-      if(parts[0]==="#controls" || parts[0]==="#_controls" || parts[0]==="#control"){
+      if(parts[0]==="#_commands" || parts[0]==="#commands" || parts[0]==="#command"){
 
         parts = parts.slice(1);
 
       }
 
-      control = this._controls.get( parts.join('.') );
+      command = this._commands.get( parts.join('.') );
 
     } else {
 
-      control = this._controls.get( key );
+      command = this._commands.get( key );
 
     }
 
-    if(control) return control;
+    if(command) return command;
 
     return null;
 

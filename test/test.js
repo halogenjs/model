@@ -524,38 +524,38 @@ describe("Hyperbone model", function(){
 
 	});
 
-	describe("Controls", function(){
+	describe("Commands", function(){
 
 		var Model = require('hyperbone-model').Model;
 
-		it("does not add _controls as attributes - reserved property", function(){
+		it("does not add _commands as attributes - reserved property", function(){
 
 			var m = new Model( useFixture('/tasklist') );
 
-			expect( m.get("_controls") ).to.not.be.ok;
+			expect( m.get("_commands") ).to.not.be.ok;
 
 		});
 
-		it("returns a control via a rel", function(){
+		it("returns a command via a rel", function(){
 
 			var m = new Model( useFixture('/tasklist') );
 
-			expect( m.control("controls:create-new") ).to.be.ok;
-			expect( m.get("task[0]").control("controls:complete") ).to.be.ok;
+			expect( m.command("cmds:create-new") ).to.be.ok;
+			expect( m.get("task[0]").command("cmds:complete") ).to.be.ok;
 
 		});
 
-		it("supports single level of controls", function(){
+		it("supports commands nested at the root of _commands", function(){
 
 			var m = new Model({
 				_links : {
-					"controls:test" : {
-						href : "#_controls/edit"
+					"cmds:test" : {
+						href : "#_commands/edit"
 					}
 				},
-				_controls : {
+				_commands: {
 					edit : {
-						action : "/create",
+						href : "/create",
 						method : "POST",
 						encoding : "application/x-www-form-urlencoded",
 						properties : [
@@ -573,23 +573,23 @@ describe("Hyperbone model", function(){
 
 			}); 
 
-			expect( m.control("controls:test").get("action") ).to.equal("/create");
+			expect( m.command("cmds:test").get("href") ).to.equal("/create");
 
 		});
 
-		it("supports ridiculous levels of controls", function(){
+		it("supports deeply nested commands", function(){
 
 			var m = new Model({
 				_links : {
-					"controls:test" : {
-						href : "#_controls/edit/test/indirection"
+					"cmds:test" : {
+						href : "#_commands/edit/test/indirection"
 					}
 				},
-				_controls : {
+				_commands : {
 					edit : {
 						test : {
 							indirection : {
-								action : "/create",
+								href : "/create",
 								method : "POST",
 								encoding : "application/x-www-form-urlencoded",
 								properties : [
@@ -609,7 +609,7 @@ describe("Hyperbone model", function(){
 
 			}); 
 
-			expect( m.control("controls:test").get("action") ).to.equal("/create");
+			expect( m.command("cmds:test").get("href") ).to.equal("/create");
 
 		});
 
@@ -620,20 +620,20 @@ describe("Hyperbone model", function(){
 
 			var m = new Model({
 				_links : {
-					"controls:one" : {
-						href : "#_controls/edit/create"
+					"cmds:one" : {
+						href : "#_commands/edit/create"
 					},
-					"controls:two" : {
-						href : "#controls/edit/create"
+					"cmds:two" : {
+						href : "#commands/edit/create"
 					},
-					"controls:three" : {
-						href : "#control/edit/create"
+					"cmds:three" : {
+						href : "#command/edit/create"
 					}
 				},
-				_controls : {
+				_commands : {
 					edit : {
 						create : {
-							action : "/create",
+							href: "/create",
 							method : "POST",
 							encoding : "application/x-www-form-urlencoded",
 							properties : [
@@ -653,25 +653,20 @@ describe("Hyperbone model", function(){
 
 			});
 
-			expect( m.control("controls:one").get("action") ).to.equal("/create");
-			expect( m.control("controls:one").get("properties").length ).to.equal(2);
+			expect( m.command("cmds:one").get("href") ).to.equal("/create");
 
-			expect( m.control("controls:two").get("action") ).to.equal("/create");
-			expect( m.control("controls:two").get("properties").length ).to.equal(2);
+			expect( m.command("cmds:two").get("href") ).to.equal("/create");
 
-			expect( m.control("controls:two").get("action") ).to.equal("/create");
-			expect( m.control("controls:two").get("properties").length ).to.equal(2);
-
-
+			expect( m.command("cmds:two").get("href") ).to.equal("/create");
 
 		});
 
-		it("returns a control via a direct reference", function(){
+		it("returns a command via a direct reference", function(){
 
 			var m = new Model( useFixture('/tasklist') );
 
-			expect( m.control("edit.create-task") ).to.be.ok;
-			expect( m.get("task[0]").control("edit.edit-task") ).to.be.ok;
+			expect( m.command("edit.create-task") ).to.be.ok;
+			expect( m.get("task[0]").command("edit.edit-task") ).to.be.ok;
 
 		});
 

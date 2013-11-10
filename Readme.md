@@ -10,26 +10,26 @@ Nested [Backbone](http://backbonejs.org/) models with special support for [JSON 
 
   Default Backbone models are [Active Record](http://en.wikipedia.org/wiki/Active_record_pattern). You have a resource and you can do CRUD operations on it and that's great. "Getting your truth out of the DOM" is true and rich, complex client-side applications can be built.
 
-  The problem is for REST Level 3 - Hypermedia documents - Backbone's simple CRUD model isn't enough. You load a resource, and that resource can have many related uris (For example a 'book' resource may contain a link to the related 'author' resource), it can have other resources embedded within it (e.g, our 'book' resource could have 'pages' embedded) and finally it could have hypermedia controls to interact with that resource __that do not point to the same uri as the original resource__. For example, our 'book' resource may have a control to add a page, and a page may have a control to delete itself from the book and so on.
+  The problem is for REST Level 3 - Hypermedia documents - Backbone's simple CRUD model isn't enough. You load a resource, and that resource can have many related uris (For example a 'book' resource may contain a link to the related 'author' resource), it can have other resources embedded within it (e.g, our 'book' resource could have 'pages' embedded) and finally it could have hypermedia commands to interact with that resource __that do not point to the same uri as the original resource__. For example, our 'book' resource may have a command to add a page, and a page may have a command to delete itself from the book and so on.
 
   Rich REST level 3 Hypermedia APIs become, in effect, a complete expression of your application in their own right. 
 
-  __Hyperbone__ extends the flip out of Backbone to attempt to support HAL properly, to make building client-side applications consuming Hypermedia APIs as painless as possible. It's more opinionated than standard Backbone (out of necessity), but as this is a modular framework you only use the modules you need and that fit with the way you work.
+  __Hyperbone__ extends Backbone to attempt to support HAL properly, to make building client-side applications consuming Hypermedia APIs as painless as possible. It's more opinionated than standard Backbone (out of necessity), but as this is a modular framework you only use the modules you need and that fit with the way you work.
 
   To this end, the roadmap for Hyperbone is as follows:
 
   - __Hyperbone Model__ : Nested Backbone models that support Hypermedia natively, supporting uri templates, rels, controls and embedded resources
-  - __Hyperbone Form__ : Generating two-way bound HTML forms from JSON Controls. 
   - __Hyperbone View__ : Binding Hyperbone Models to the DOM
+  - __Hyperbone View Command Extensions__ : Binding _commands to the DOM
   - __Hyperbone IO__ : HTTP and Web Socket interactions for Hyperbone Models.
   - __Hyperbone App__ : Convention based routing
 
-  Currently the first two have been completed, App has been stubbed out. Work is progressing on View. 
+  Currently the first two have been completed.
 
   
 ## WARNING!
 
-  To remove the jQuery dependency and because Models in Hyperbone are not Active Records, the .sync() and .fetch() functionality has been stripped out. Changes to models are via controls, which are forms that are submitted to a server. HTTP interactions will be handled by the IO module (in development)
+  To remove the jQuery dependency and because Models in Hyperbone are not Active Records, the .sync() and .fetch() functionality has been stripped out. Changes to models are via commands, which are forms that are submitted to a server. HTTP interactions will be handled by the IO module (in development)
 
 ## Features
 
@@ -40,6 +40,7 @@ Nested [Backbone](http://backbonejs.org/) models with special support for [JSON 
   - automatic mapping of _embedded data to model attributes
   - True nesting, with support for dot notation access and ability to bind to events on nested attributes.
   - ability to assign custom Model prototypes for use with specific attributes with custom _prototypes attribute.
+  - Special _commands keyword
 
 
 ## Installation
@@ -330,50 +331,53 @@ Hyperbone supports curie (and `curies` with an array, incidentally), and offers 
   expect( model.fullyQualitiedRel( "rofl:test" ) ).to.equal("http://www.helloworld.com/rels/test"); // TRUE
 ```
 
-## Controls
+## Commands
 
-Not part of the HAL Spec, but added to Hyperbone Model is some basic support for Hypermedia Controls, using the reserved property `_controls`.
+Not part of the HAL Spec, but added to Hyperbone Model is some basic support for Hypermedia Commands, using the reserved property `_commands`.
 
-Controls are a JSON representation of forms, allowing the HAL document to define all the possible interactions with a resource (including those to a different URI than the resource itself)
+We won't go into too much detail here, but Commands represent HTTP interactions available to a resource. The simplest commands containly only what is necessary for a client to make a valid HTTP request, but these can be extended with a schema to add validation and the handy ability to generate placeholder forms. 
 
-All this module does to assist is reserve the `_controls` keyword and offer a handy shortcut for pulling out individual control from a HAL document via an internal rel.
+All this module does to assist is reserve the `_commands` keyword and offer a handy shortcut for pulling out individual commands from a HAL document via an internal rel.
 
-In practice your control JSON can be anything you want if you're handling it yourself, however there is a specific module with a specific spec for automatically transforming JSON controls into fully two-way bound styleable html form. See [Hyperbone Form](https://github.com/green-mesa/hyperbone-form) for more details. 
+In practice your command JSON can be anything you want if you're handling it yourself, but there is a specific extension for Hyperbone View that allows you to bind your View to these commands more directly which requires a certain type of input. Generally a command has an 'href', a 'method' and some properties which represent the data that will be exchanged with the server.
+
 
 ```js
  {
   _links : {
-    "controls:create-new" : { // the internal rel for this control is "controls:create-new"
-      href : "#_controls/create" // interla uri
+    "cmds:create-new" : { // the internal rel for this control is "controls:create-new"
+      href : "#_commands/create" // interal uro
     }
   },
-  _controls : { // special _controls property
+  _commands : { // special _controls property
     create : {
       method : "POST",
-      action : "/thing/create",
+      href : "/thing/create",
       encoding : "application/x-form-www-urlencoding",
-      _children : [
-        // ... details of the form here
+      properties : [
+        name : "",
+        description : "",
+        wantsThing : true
       ]
-    }
+    } 
   }
  }
 ```
 
-### .control( [rel / id] )
+### .command( [rel / id] )
 
-Get the control via rel or via dot notation.
+Get the command model via rel or via dot notation.
 
 ```javascript
-  model.control("controls:create-new");
+  model.command("cmds:create-new");
   
 ```
 
 ```javascript
-  model.control("create");
+  model.command("create");
 ```
 
-The convention is that an internal rel to a control can begin `#controls` or `#_controls` or `#control` and the path to the specific control is separated by a slash. 
+The convention is that an internal rel to a command can begin `#commands` or `#_commandss` or `#command` and then the path to the specific command is separated by a slash. 
 
 
 ## Testing
