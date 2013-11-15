@@ -51,13 +51,14 @@ var HyperboneModel = function(attributes, options){
     this.collection = options.collection;
   }
 
+  attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
+
   if( options && options.parse ){
     attributes = this.parse( this.parseHypermedia( attributes ) );
   } else {
     attributes = this.parseHypermedia( attributes ) ;
   }
 
-    attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
     // need to override the set method, methinks.
     this.set(attributes, {silent : true});
