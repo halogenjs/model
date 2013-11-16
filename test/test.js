@@ -555,23 +555,17 @@ describe("Hyperbone model", function(){
 				},
 				_commands: {
 					edit : {
-						href : "/create",
-						method : "POST",
-						encoding : "application/x-www-form-urlencoded",
-						properties : [
-							{
-								name : "name",
-								type : "text"
-							},
-							{
-								name : "description",
-								type : "text"
+							href: "/create",
+							method : "POST",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								name : "Default",
+								description : "Default"
 							}
-						]
 					}
 				}
 
-			}); 
+			});
 
 			expect( m.command("cmds:test").get("href") ).to.equal("/create");
 
@@ -589,19 +583,14 @@ describe("Hyperbone model", function(){
 					edit : {
 						test : {
 							indirection : {
-								href : "/create",
+								href: "/create",
 								method : "POST",
 								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "name",
-										type : "text"
-									},
-									{
-										name : "description",
-										type : "text"
-									}
-								]
+								properties : {
+									name : "Default",
+									description : "Default"
+
+								}
 							}
 						}
 					}
@@ -636,16 +625,11 @@ describe("Hyperbone model", function(){
 							href: "/create",
 							method : "POST",
 							encoding : "application/x-www-form-urlencoded",
-							properties : [
-								{
-									name : "name",
-									type : "text"
-								},
-								{
-									name : "description",
-									type : "text"
-								}
-							]
+							properties : {
+								name : "Default",
+								description : "Default"
+
+							}
 						}
 
 					}
@@ -669,6 +653,215 @@ describe("Hyperbone model", function(){
 			expect( m.get("task[0]").command("edit.edit-task") ).to.be.ok;
 
 		});
+
+		it("Exposes a properties method for acessing the properties directly", function(){
+
+			var m = new Model({
+				_links : {
+					"cmds:two" : {
+						href : "#_commands/edit/create"
+					}
+				},
+				_commands : {
+					edit : {
+						create : {
+							href: "/create",
+							method : "POST",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								name : "Default",
+								description : "Default description"
+							}
+						}
+
+					}
+				}
+
+			});
+
+			var properties = m.command('cmds:two').properties();
+
+			expect(properties.get('name')).to.equal('Default');
+
+		});
+
+		it("can pull data from the parent model", function(){
+
+			var m = new Model({
+				_links : {
+					"cmds:two" : {
+						href : "#_commands/edit/create"
+					}
+				},
+				name : "Not default",
+				description : "Not default description",
+				bugger : 'this',
+				_commands : {
+					edit : {
+						create : {
+							href: "/create",
+							method : "POST",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								name : "Default",
+								description : "Default description"
+							}
+						}
+
+					}
+				}
+
+			});	
+
+			var cmd = m.command('cmds:two');
+			var properties = cmd.properties();
+
+			cmd.pull();
+
+			expect(properties.get('name')).to.equal('Not default');
+			expect(properties.get('description')).to.equal('Not default description');
+			expect(properties.get('bugger')).to.equal(null);
+
+		});
+
+		it("can push data to the parent model", function(){
+
+				var m = new Model({
+				_links : {
+					"cmds:two" : {
+						href : "#_commands/edit/create"
+					}
+				},
+				name : "Not default",
+				description : "Not default description",
+				bugger : 'this',
+				_commands : {
+					edit : {
+						create : {
+							href: "/create",
+							method : "POST",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								name : "Default",
+								description : "Default description"
+							}
+						}
+
+					}
+				}
+
+			});	
+
+			var cmd = m.command('cmds:two');
+			var properties = cmd.properties();
+
+			cmd.push();
+
+			expect(m.get('name')).to.equal('Default');
+			expect(m.get('description')).to.equal('Default description');
+			expect(m.get('bugger')).to.equal('this');		
+
+		});
+
+		it('can push data to another command', function(){
+
+			var m = new Model({
+				_links : {
+					"cmds:two" : {
+						href : "#_commands/edit/create"
+					},
+					"cmds:one" : {
+						href : "#_commands/edit/other-create"
+					}
+				},
+				name : "Not default",
+				description : "Not default description",
+				bugger : 'this',
+				_commands : {
+					edit : {
+						create : {
+							href: "/create",
+							method : "POST",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								name : "Default",
+								description : "Default description"
+							}
+						},
+						"other-create" : {
+							href : "/other-create",
+							method : "PUT",
+							properties : {
+								name : "Something else",
+								description : "Flip and blast!",
+								randomness : "Hello!"
+							}
+						}
+
+					}
+				}
+
+			});
+
+			m.command('cmds:one').pushTo( m.command('cmds:two') );
+
+			var props = m.command('cmds:two').properties();
+
+			expect( props.get('name') ).to.equal('Something else');
+			expect( props.get('description') ).to.equal('Flip and blast!');
+			expect( props.get('randomness') ).to.equal(null);
+
+		});
+
+		it("can pull data from another command", function(){
+
+			var m = new Model({
+				_links : {
+					"cmds:two" : {
+						href : "#_commands/edit/create"
+					},
+					"cmds:one" : {
+						href : "#_commands/edit/other-create"
+					}
+				},
+				name : "Not default",
+				description : "Not default description",
+				bugger : 'this',
+				_commands : {
+					edit : {
+						create : {
+							href: "/create",
+							method : "POST",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								name : "Default",
+								description : "Default description"
+							}
+						},
+						"other-create" : {
+							href : "/other-create",
+							method : "PUT",
+							properties : {
+								name : "Something else",
+								description : "Flip and blast!",
+								randomness : "Hello!"
+							}
+						}
+
+					}
+				}
+
+			});
+
+			m.command('cmds:two').pullFrom( m.command('cmds:one') );
+
+			var props = m.command('cmds:two').properties();
+
+			expect( props.get('name') ).to.equal('Something else');
+			expect( props.get('description') ).to.equal('Flip and blast!');
+			expect( props.get('randomness') ).to.equal(null);
+
+		})
 
 	})
 

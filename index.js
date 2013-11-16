@@ -26,6 +26,8 @@ var Collection = require('backbone-collection').Collection.extend({
 });
 var makeTemplate = require('uritemplate').parse;
 
+var Command;
+
 var HyperboneModel = function(attributes, options){
 
   // we override the initial function because we need to force a hypermedia parse at the
@@ -135,9 +137,10 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
         _.each(obj, function( o, id ){
 
-          if(o.method){
+          if(o.properties){
 
-            temp[id] = new HyperboneModel(o);
+            temp[id] = new Command(o);
+            temp[id]._parentModel = self;
 
             if(!o.href){
 
@@ -535,6 +538,48 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 });
 
 HyperboneModel.extend = BackboneModel.extend;
+
+Command = HyperboneModel.extend({
+
+  defaults : {
+    method : "",
+    href : "",
+    properties : {}
+  },
+  properties : function(){
+    return this.get('properties');
+  },
+  pushTo : function( command ){
+    var output = command.properties();
+    var input = this.properties();
+    _.each(output.attributes, function( value, key ){
+      output.set(key, input.get(key));
+    });
+    return this;
+  },
+  pullFrom : function( command ){
+    var output = this.properties();
+    var input = command.properties();
+    _.each(output.attributes, function( value, key ){
+      output.set(key, input.get(key));
+    });
+    return this;
+  },
+  pull : function(){
+    var self = this;
+    var props = this.properties();
+    _.each(props.attributes, function(value, key){
+      props.set(key, self._parentModel.get(key));
+    });
+  },
+  push : function(){
+    var self = this;
+    var props = this.properties();
+    _.each(props.attributes, function(value, key){
+      self._parentModel.set(key, value);
+    });
+  }
+});
 
 module.exports.Model = HyperboneModel;
 module.exports.Collection = Collection;
