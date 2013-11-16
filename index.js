@@ -295,7 +295,15 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
           // we're adding to a collection
           _.each(value, function( model, index){
 
-            current[key].at(index).set( model );
+            if(current[key].at(index)){
+
+              current[key].at(index).set( model );
+
+            }else{
+
+              current[key].add( model );
+              
+            }
 
           });
 
