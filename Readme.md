@@ -333,15 +333,19 @@ Hyperbone supports curie (and `curies` with an array, incidentally), and offers 
 
 ## Commands
 
-Not part of the HAL Spec, but added to Hyperbone Model is some basic support for Hypermedia Commands, using the reserved property `_commands`.
+Not part of the HAL Spec, but a crucial part of Hyperbone and the whole philosophy behind it. Model supports "Hypermedia Commands", using the reserved property `_commands`.
 
-We won't go into too much detail here, but Commands represent HTTP interactions available to a resource. The simplest commands containly only what is necessary for a client to make a valid HTTP request, but these can be extended with a schema to add validation and the handy ability to generate placeholder forms. 
+We won't go into too much detail here, but Commands represent HTTP interactions available to a resource. The simplest commands contain only what is necessary for a client to make a valid HTTP request, and the plan is the allow adding a schema to these so allow for validation/more useful form generation.
 
-All this module does to assist is reserve the `_commands` keyword and offer a handy shortcut for pulling out individual commands from a HAL document via an internal rel.
+These commands could come from the server as part of the Hypermedia document you've loaded, or they can be defined in the model prototype with `defaults` and thus form a client side Hypermedia definition of the various HTTP interactions - or even just forms - that your application has. 
 
-In practice your command JSON can be anything you want if you're handling it yourself, but there is a specific extension for Hyperbone View that allows you to bind your View to these commands more directly which requires a certain type of input. Generally a command has an 'href', a 'method' and some properties which represent the data that will be exchanged with the server.
+One nifty side effect of defining `_commands` in the model prototype is that it can either make Hyperbone worth with non-Hypermedia APIs, or it can form the spec/definition of an as-yet non-existing API. You can build your client side application without even seeing an API then use the `_commands` and your dummy handlers to build an API spec. It's pretty cool. 
 
+Hyperbone Model offers a method for getting at Commands in your model, and commands themselves have a few special methods built in.
 
+Commands need a method, an href and some properties. The properties are just an object containing key-value pairs representing the form fields that the server expects to see in the submitted form. 
+
+Here's an example of a HAL document with a `_command`.
 ```js
  {
   _links : {
@@ -354,11 +358,11 @@ In practice your command JSON can be anything you want if you're handling it you
       method : "POST",
       href : "/thing/create",
       encoding : "application/x-form-www-urlencoding",
-      properties : [
-        name : "",
-        description : "",
+      properties : {
+        name : "Default name",
+        description : "Default description",
         wantsThing : true
-      ]
+      }
     } 
   }
  }
@@ -370,15 +374,72 @@ Get the command model via rel or via dot notation.
 
 ```javascript
   model.command("cmds:create-new");
-  
-```
-
-```javascript
+ // ===
   model.command("create");
 ```
 
-The convention is that an internal rel to a command can begin `#commands` or `#_commandss` or `#command` and then the path to the specific command is separated by a slash. 
+The convention is that an internal rel to a command can begin `#commands` or `#_commands` or `#command` and then the path to the specific command is separated by a slash. 
 
+## Command API
+
+After accessing a command, e.g., 
+```js
+var command = model.command('cmds:create-new');
+```
+
+You get...
+
+### .properties()
+
+Access the nested properties model.
+
+```js
+var properties = command.properties();
+properties.get('name'); 
+// "Default name"
+```
+This is a shortcut for
+```js
+command.get('properties.name')
+// "Default name"
+```
+
+### .pull()
+
+Any properties in the command that exist in the parent model are copied to the command.
+
+```js
+model.set('name', 'No longer the default');
+command.pull();
+command.properties().get('name')
+// "No longer the default"
+```
+
+### .push()
+
+All the properties in the command are pushed into the parent model.
+
+```js
+command.push();
+model.get('name');
+// "Default name"
+```
+
+### About push and pull more generally
+
+In the Hyperbone world, when you want to gather data from a user, you can bind a particular input to a particular model attribute like you would with Backbone. And that's fine. 
+
+But Hyperbone adds the ability to bind entire forms to Commands. These commands may need seralising and sending to a server, or maybe they'll just be dealt with by your own application. Doesn't really matter. They're just commands, operations that will change your resource in some way, either locally or remotely.
+
+But Commands don't interact with the parent model by default. They're isolated. The reason the .push() and .pull() methods exist is so that you can slowly build up your model using various commands, pushing their properties into your model and then have another command pull all the data it needs from the model ready for submitting to the server. 
+
+### .pushTo( command )
+
+Commands can push their properties directly to other Commands. This only copies properties that exist in the target command though.
+
+### .pullFrom( command )
+
+Commands can also pull properties from another command, but it only pulls properties that exist inside itself. 
 
 ## Testing
 
