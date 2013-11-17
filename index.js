@@ -141,6 +141,12 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
             temp[id] = new Command(o);
             temp[id]._parentModel = self;
+            
+            _.each(temp[id].properties().attributes, function(value, key){
+              temp[id].properties().on("change:" + key, function(properties, value){
+                self.trigger('change:' + key + ":" + id, temp[id], value);
+              });
+            });
 
             if(!o.href){
 
