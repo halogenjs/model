@@ -863,6 +863,138 @@ describe("Hyperbone model", function(){
 
 		})
 
-	})
+	});
+
+	describe("Reloading hypermedia", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it("Has a reset method", function(){
+
+			var m = new Model({});
+
+			expect( m.reinit ).to.be.a('function');
+
+		});
+
+		it("Returns properties to their defaults", function(){
+
+			var Proto = Model.extend({
+				defaults : {
+					"test" : "From Model"
+				}
+			});
+
+			var m = new Proto({
+				otherThing : 'From Data'
+			});
+
+			expect(m.get('test')).to.equal('From Model');
+			expect(m.get('otherThing')).to.equal('From Data');
+
+			m.set('test', 'From Code');
+
+			expect(m.get('test')).to.equal('From Code');
+
+			m.reinit({
+				otherThing : 'From New Data'
+			});
+
+			expect(m.get('test')).to.equal('From Model');
+
+		});
+
+		it("It triggers change events for properties", function( done ){
+
+			var Proto = Model.extend({
+				defaults : {
+					"test" : "From Model"
+				}
+			});
+
+			var m = new Proto({
+				otherThing : 'From Data'
+			});
+
+			m.set('test', 'From Code');
+
+			var count = 0;
+
+			m.on({
+				'change:otherThing change:test' : function(val){
+					count++;
+
+					if(count === 2){
+						
+						expect(m.get('test')).to.equal('From Model');
+						expect(m.get('otherThing')).to.equal('From New Data');
+
+						done();
+
+					}
+
+				}
+
+			});
+
+			m.reinit({
+				otherThing : "From New Data"		
+			});
+
+		});
+
+		it("Also triggers change events for non-default command properties", function(done){
+
+			var Proto = Model.extend({
+				defaults : {
+					"test" : "From Model"
+				}
+			});
+
+			var m = new Proto({
+				"otherThing" : 'From Data',
+				_commands : {
+					flip : {
+						test : {
+							method : 'PUT',
+							href : "/test",
+							properties : {
+								"test" : "From Model"
+							}
+						}
+					}
+				}
+			});
+
+			var cmd = m.command('flip.test');
+
+			expect( cmd.properties().get('test') ).to.equal('From Model');
+
+			cmd.get('properties').on('change:test', function(){
+
+				// reference to cmd should still be valid if the event has fired.
+				expect(cmd.properties().get('test') ).to.equal('From New Data');
+				done();
+
+			});
+
+			m.reinit({
+				"otherThing" : 'From New Data',
+				_commands : {
+					flip : {
+						test : {
+							method : 'PUT',
+							href : '/test',
+							properties : {
+								'test' : 'From New Data'
+							}
+						}
+					}
+				}
+			});
+
+		});
+
+	});
 
 });

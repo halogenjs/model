@@ -14,9 +14,9 @@ var Collection = require('backbone-collection').Collection.extend({
   toJSON : function(){
     var arr = [];
     _.each(this.models, function(model, index){
-      if(model.isHyperbone){
+      if (model.isHyperbone){
         arr.push(model.toJSON());
-      }else{  
+      } else {  
         arr.push(model);
       }
 
@@ -36,41 +36,53 @@ var HyperboneModel = function(attributes, options){
   attributes || (attributes = {}); // this will cause a throw later on...
 
   this.attributes = {};
-    this.cid = _.uniqueId('c');
+  this.cid = _.uniqueId('c');
 
-    this.isHyperbone = true;
+  this.isHyperbone = true;
 
-    if(!this._prototypes) this._prototypes = {};
+  if (!this._prototypes) this._prototypes = {};
 
   options || (options = {});
 
-  if( attributes._prototypes ){
+  if ( attributes._prototypes ){
     _.extend( this._prototypes, attributes._prototypes );
     delete attributes._prototypes;
   }
 
-  if( options && options.collection ){
+  if ( options && options.collection ){
     this.collection = options.collection;
   }
 
   attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
-  if( options && options.parse ){
+  if ( options && options.parse ){
     attributes = this.parse( this.parseHypermedia( attributes ) );
   } else {
     attributes = this.parseHypermedia( attributes ) ;
   }
 
+  this.set(attributes, {silent : true});
 
-    // need to override the set method, methinks.
-    this.set(attributes, {silent : true});
-
-    this.changed = {};
-    this.initialize.apply(this, arguments);
+  this.changed = {};
+  this.initialize.apply(this, arguments);
 
 };
 
 _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
+
+  reinit : function( attributes, options ){
+
+    attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
+
+    if ( options && options.parse ){
+      attributes = this.parse( this.parseHypermedia( attributes ) );
+    } else {
+      attributes = this.parseHypermedia( attributes ) ;
+    }
+
+    this.set(attributes);
+
+  },
 
   parseHypermedia : function( attributes ){
 
@@ -84,11 +96,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     var curies = (  this._links ? this._links['curie'] ? [this._links['curie']] : (this._links['curies'] ? this._links['curies'] : null) : null  );
 
-    if(curies){
+    if (curies){
 
       _.each(curies, function(curie){
 
-        if(!curie.templated) throw new Error("A curie without a template? What are you thinking?");
+        if (!curie.templated) throw new Error("A curie without a template? What are you thinking?");
 
         this._curies[curie.name] = makeTemplate(curie.href);
 
@@ -99,13 +111,13 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     // collapse unnecessary arrays. 
     _.each(this._links, function(link, id){
 
-      if(_.isArray(link) && link.length === 1){
+      if (_.isArray(link) && link.length === 1){
 
         this._links[id] = link[0];
 
       }
 
-      if(link.templated){
+      if (link.templated){
 
         link.template = makeTemplate( link.href );
 
@@ -113,7 +125,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     }, this);
 
-    if(attributes._embedded){
+    if (attributes._embedded){
 
       _.each(attributes._embedded, function(val, attr){
 
@@ -125,42 +137,73 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     }
 
-    if(attributes._commands){
+    if (attributes._commands){
 
-      this._commands = {};
+      if (!this._commands){
+        this._commands = new HyperboneModel()
+      }
 
       var findCommands;
 
-      findCommands = function( obj ){
+      findCommands = function( obj, parentId){
 
         var temp = {};
 
         _.each(obj, function( o, id ){
 
-          if(o.properties){
+          var fullId;
 
-            temp[id] = new Command(o);
-            temp[id]._parentModel = self;
-            
-            _.each(temp[id].properties().attributes, function(value, key){
-              temp[id].properties().on("change:" + key, function(properties, value){
-                self.trigger('change:' + key + ":" + id, temp[id], value);
+          if(parentId){
+
+            fullId = parentId + "." + id;
+
+          } else {
+
+            fullId = id;
+
+          }
+
+          if (o.properties){
+
+            if(self.command(fullId)){
+
+              var cmd = self.command(fullId);
+
+              _.each(o, function(value, key){
+                if (key !== 'properties'){
+                  cmd.set(key, value);
+                } else {
+                  
+                  _.each(value, function(value, key){
+                    cmd.set('properties.' + key, value);
+                  })
+                }
               });
-            });
 
-            if(!o.href){
+            }else{
 
-              temp[id].set("href", self.url(), { silent : true});
+              temp[id] = new Command(o);
+              temp[id]._parentModel = self;
+              
+              _.each(temp[id].properties().attributes, function(value, key){
+                temp[id].properties().on("change:" + key, function(properties, value){
+                  self.trigger('change:' + key + ":" + id, temp[id], value);
+                });
+              });
+
+              if (!o.href){
+
+                temp[id].set("href", self.url(), { silent : true});
+
+              }
 
             }
 
           } else {
 
-            temp[id] = findCommands(o);
+            temp[id] = findCommands(o, fullId);
 
           }
-
-          
 
         });
 
@@ -168,7 +211,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       }
 
-      this._commands = new HyperboneModel( findCommands( attributes._commands ) );
+      this._commands.set(findCommands( attributes._commands ));
       delete attributes._commands;      
     }
 
@@ -195,7 +238,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   url : function(){
 
-    if(this._links.self && this._links.self.href){
+    if (this._links.self && this._links.self.href){
 
       return this._links.self.href;
 
@@ -207,11 +250,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   get: function(attr) {
 
-    if(this.attributes[attr] || this.attributes[attr] === 0){ 
+    if (this.attributes[attr] || this.attributes[attr] === 0){ 
 
       return this.attributes[attr];
 
-    } else if(_.indexOf(attr, '.')!==-1 || /([a-zA-Z_]+)\[([0-9]+)\]/.test(attr) ){
+    } else if (_.indexOf(attr, '.')!==-1 || /([a-zA-Z_]+)\[([0-9]+)\]/.test(attr) ){
 
       var parts = attr.split(".");
 
@@ -219,7 +262,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       var remainder = parts.join('.')
 
-      if(this.attributes[attr]){
+      if (this.attributes[attr]){
 
         return this.attributes[attr].get( remainder );
 
@@ -227,20 +270,28 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
         parts = attr.match(/([a-zA-Z_]+)\[([0-9]+)\]/);
 
-        var index = parseInt(parts[2], 10);
-        attr = parts[1]
+        if(parts){
 
-        if(_.isNumber( index ) && this.attributes[attr]){
+          var index = parseInt(parts[2], 10);
+          attr = parts[1]
 
-          if(remainder){
+          if (_.isNumber( index ) && this.attributes[attr]){
 
-            return this.attributes[ attr ].at( index ).get( remainder );
+            if (remainder){
 
-          }else{
+              return this.attributes[ attr ].at( index ).get( remainder );
 
-            return this.attributes[ attr ].at( index );
+            } else {
+
+              return this.attributes[ attr ].at( index );
+
+            }
 
           }
+
+        } else {
+
+          return null;
 
         }
 
@@ -297,18 +348,18 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     // Recursively call set on nested models and collections
     _.each(attrs, function(value, key){
 
-      if(_.isObject(value) && current[key] && current[key].isHyperbone){
+      if (_.isObject(value) && current[key] && current[key].isHyperbone){
 
-        if(_.isArray(value)){
+        if (_.isArray(value)){
 
           // we're adding to a collection
           _.each(value, function( model, index){
 
-            if(current[key].at(index)){
+            if (current[key].at(index)){
 
               current[key].at(index).set( model );
 
-            }else{
+            } else {
 
               current[key].add( model );
               
@@ -318,7 +369,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
           delete attrs[key];
 
-        }else{
+        } else {
 
           current[key].set(value);
           delete attrs[key];
@@ -331,7 +382,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     for (attr in attrs) {
 
-      if(_.indexOf(attr, ".") !== -1 && !ignoreDotNotation){
+      if (_.indexOf(attr, ".") !== -1 && !ignoreDotNotation){
 
         parts = attr.split('.');
         attr = parts.pop();
@@ -343,11 +394,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
           val = attrs[attr];
 
-          if(_.isObject(val) && !_.isArray(val)){
+          if (_.isObject(val) && !_.isArray(val)){
 
-          if(!val.isHyperbone && !noTraverse){
+          if (!val.isHyperbone && !noTraverse){
 
-            if(this._prototypes[attr]){
+            if (this._prototypes[attr]){
 
               Proto = this._prototypes[attr];
 
@@ -363,7 +414,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
           }
 
-          if(val.on){
+          if (val.on){
 
             val._trigger = val.trigger;
             val.trigger = function(attr){
@@ -377,21 +428,21 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
           }
 
-        } else if(_.isArray(val)){
+        } else if (_.isArray(val)){
 
           var containsJustObjects = true;
 
           _.each(val, function( element ){
 
-            if(!_.isObject(element)) containsJustObjects = false;
+            if (!_.isObject(element)) containsJustObjects = false;
 
           });
 
-          if(containsJustObjects){
+          if (containsJustObjects){
 
             var elements = [];
 
-            if(this._prototypes[attr]){
+            if (this._prototypes[attr]){
 
               Proto = this._prototypes[attr];
 
@@ -474,19 +525,19 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     var link = this._links[rel] || {};
 
-    if(!link){
+    if (!link){
 
       throw new Error("No such rel found");
 
     }
 
-    if(link.templated){
+    if (link.templated){
 
-      if(!data){
+      if (!data){
 
         throw new Error("No data provided to expand templated uri");
 
-      }else{
+      } else {
 
         return link.template.expand( data );
 
@@ -517,11 +568,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     var command;
 
-    if(this._links[key]){
+    if (this._links[key]){
 
       var parts = this._links[key].href.split(/\//g);
 
-      if(parts[0]==="#_commands" || parts[0]==="#commands" || parts[0]==="#command"){
+      if (parts[0] === "#_commands" || parts[0] === "#commands" || parts[0] === "#command"){
 
         parts = parts.slice(1);
 
@@ -535,7 +586,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     }
 
-    if(command) return command;
+    if (command) return command;
 
     return null;
 
