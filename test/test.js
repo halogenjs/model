@@ -426,6 +426,28 @@ describe("Hyperbone model", function(){
 
 		});
 
+		it("can get a self.href from url()", function(){
+
+			var m = new Model({ _links : { self : { href : "/test" }} });
+
+			m.url('/not-test');
+
+			expect( m.url() ).to.equal("/not-test");
+			expect( m.rel("self") ).to.equal("/not-test");
+
+		});
+
+		it("can get a self.href from url()", function(){
+
+			var m = new Model({});
+
+			m.url('/not-test');
+
+			expect( m.url() ).to.equal("/not-test");
+			expect( m.rel("self") ).to.equal("/not-test");
+
+		});	
+
 		it("can set and get other rels", function(){
 
 			var m = new Model( useFixture('/services_curie') );

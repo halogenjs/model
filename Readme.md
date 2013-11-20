@@ -21,10 +21,8 @@ Nested [Backbone](http://backbonejs.org/) models with special support for [JSON 
   - __Hyperbone Model__ : Nested Backbone models that support Hypermedia natively, supporting uri templates, rels, controls and embedded resources
   - __Hyperbone View__ : Binding Hyperbone Models to the DOM
   - __Hyperbone View Command Extensions__ : Binding _commands to the DOM
-  - __Hyperbone IO__ : HTTP and Web Socket interactions for Hyperbone Models.
-  - __Hyperbone App__ : Convention based routing
-
-  Currently the first two have been completed.
+  - __Hyperbone IO__ : HTTP extensions for Hyperbone Models
+  - __Hyperbone Router__ : Sinatra/Express style routing for Hyperbone Applications
 
   
 ## WARNING!
@@ -275,6 +273,16 @@ Shortcut to .rel('self');
   expect( model.url() ).to.equal("/helloworld"); // TRUE
 ```
 
+### .url( uri )
+
+Set the _links.self.href value. Easier than new Model({ _links : { self : { href : "/some-uri"}}});
+
+```
+// With HyperboneIO extensions...
+var model = new Model().url('/some-uri');
+model.url(); // /some-uri
+```
+
 ### .rel( rel [, data])
 
 Get a link to another rel of the resource. If a particular rel is a URI template and `templated: true` is set, then rel
@@ -329,6 +337,31 @@ Hyperbone supports curie (and `curies` with an array, incidentally), and offers 
 
   expect( model.rel( "rofl:test" ) ).to.equal("/test"); // TRUE
   expect( model.fullyQualitiedRel( "rofl:test" ) ).to.equal("http://www.helloworld.com/rels/test"); // TRUE
+```
+
+### .reinit( hypermedia )
+
+Reinit is specific to Hyperbone Model. It returns all properties to any default values set in the model prototype and then merges in the newly loaded Hypermedia. Change events for issued for everything that's changed between the two versions. In a way this is more of an internal method to be used by Hyperbone IO but if you're using jQuery or some other separate HTTP system then .
+
+```js
+var MyModel = Model.extend({
+  defaults : {
+    'state' : 'initial'
+  }
+});
+
+var model = new MyModel({
+  'thing' : "some value!"
+});
+
+model.set('state', 'loaded');
+
+model.reinit({
+  'thing' : "Some other value!";
+});
+
+model.get('state', 'initial');
+model.get('thing', 'Some other value!');
 ```
 
 ## Commands

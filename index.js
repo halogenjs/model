@@ -236,15 +236,27 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  url : function(){
+  url : function( uri ){
 
-    if (this._links.self && this._links.self.href){
+    if ( uri ){
 
-      return this._links.self.href;
+      _.extend(this._links, {
+        self : { href : uri }
+      });
+
+      return this;
+
+    } else {
+
+      if (this._links.self && this._links.self.href){
+
+        return this._links.self.href;
+
+      }
+
+      throw new Error("Not a hypermedia resource");
 
     }
-
-    throw new Error("Not a hypermedia resource");
 
   },
 
