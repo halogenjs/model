@@ -53,13 +53,14 @@ var HyperboneModel = function(attributes, options){
     this.collection = options.collection;
   }
 
+  // this parser is for turning the source input into compatible hypermedia.
+  if( this.parser ){
+    attributes = this.parser( attributes );
+  }
+
   attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
-  if ( this.parser ){
-    attributes = this.parseHypermedia( this.parser(attributes) );
-  } else {
-    attributes = this.parseHypermedia( attributes );
-  }
+  attributes = this.parseHypermedia( attributes );
 
   this.set(attributes, {silent : true});
 
