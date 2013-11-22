@@ -1,6 +1,6 @@
 {
   "name": "hyperbone-model",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "Hyperbone model",
   "main": "index.js",
   "scripts": {

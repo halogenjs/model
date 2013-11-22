@@ -1019,4 +1019,23 @@ describe("Hyperbone model", function(){
 
 	});
 
+	describe("Pre-parsing", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it("allows a preParser to be defined", function(){
+
+			var ParsedModel = Model.extend({
+				parser : function( source ){
+					return { _links : {self : {href : source.url }}}
+				}
+			});
+
+			var m = new ParsedModel({ url : '/hello-world' });
+
+			expect(m.url()).to.equal('/hello-world');
+		})
+
+	})
+
 });

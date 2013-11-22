@@ -55,10 +55,10 @@ var HyperboneModel = function(attributes, options){
 
   attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
-  if ( options && options.parse ){
-    attributes = this.parse( this.parseHypermedia( attributes ) );
+  if ( this.parser ){
+    attributes = this.parseHypermedia( this.parser(attributes) );
   } else {
-    attributes = this.parseHypermedia( attributes ) ;
+    attributes = this.parseHypermedia( attributes );
   }
 
   this.set(attributes, {silent : true});
@@ -74,8 +74,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
-    if ( options && options.parse ){
-      attributes = this.parse( this.parseHypermedia( attributes ) );
+    if ( this.parser ){
+      attributes = this.parseHypermedia( this.parser(attributes) );
     } else {
       attributes = this.parseHypermedia( attributes ) ;
     }
