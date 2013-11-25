@@ -141,10 +141,10 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     if (attributes._commands){
 
       if (!this._commands){
-        this._commands = new HyperboneModel()
+        this._commands = new HyperboneModel();
       }
 
-      var findCommands;
+      var findCommands, foundCommands = [];
 
       findCommands = function( obj, parentId){
 
@@ -197,6 +197,10 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 temp[id].set("href", self.url(), { silent : true});
 
               }
+              foundCommands.push(function(){
+                self.trigger('command-found:' + fullId);
+              });
+              
 
             }
 
@@ -210,9 +214,15 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
         return temp;
 
-      }
+      };
 
       this._commands.set(findCommands( attributes._commands ));
+
+      // publish signals for commands that have been found
+      _.each(foundCommands, function( fn ){
+        fn();
+      });
+
       delete attributes._commands;      
     }
 
