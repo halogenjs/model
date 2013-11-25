@@ -581,7 +581,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     var command;
 
-    if (this._links[key]){
+    if (this._links[key] && this._commands){
 
       var parts = this._links[key].href.split(/\//g);
 
@@ -593,7 +593,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       command = this._commands.get( parts.join('.') );
 
-    } else {
+    } else if(this._commands){
 
       command = this._commands.get( key );
 
