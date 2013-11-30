@@ -296,6 +296,15 @@ describe("Hyperbone model", function(){
 				lol : {
 					brand : "google",
 					app : "mail"
+				},
+				_commands : {
+					'test' : {
+						href : '/things',
+						method : "POST",
+						properties : {
+							'hello' : 'world'
+						}
+					}
 				}
 			});
 
@@ -320,7 +329,22 @@ describe("Hyperbone model", function(){
 				lol : {
 					brand : "google",
 					app : "mail"
+				},
+				_links : {
+					self : {
+						href : '/tojson.test'
+					}
+				},
+				_commands : {
+					test : {
+						href : '/things',
+						method : "POST",
+						properties : {
+							'hello' : 'world'
+						}
+					}
 				}
+
 			});
 
 		});
@@ -590,37 +614,7 @@ describe("Hyperbone model", function(){
 			});
 
 			expect( m.command("cmds:test").get("href") ).to.equal("/create");
-
-		});
-
-		it("supports deeply nested commands", function(){
-
-			var m = new Model({
-				_links : {
-					"cmds:test" : {
-						href : "#_commands/edit/test/indirection"
-					}
-				},
-				_commands : {
-					edit : {
-						test : {
-							indirection : {
-								href: "/create",
-								method : "POST",
-								encoding : "application/x-www-form-urlencoded",
-								properties : {
-									name : "Default",
-									description : "Default"
-
-								}
-							}
-						}
-					}
-				}
-
-			});
-
-			expect( m.command("cmds:test").get("href") ).to.equal("/create");
+			expect( m.command('edit').get('href') ).to.equal('/create');
 
 		});
 
@@ -632,28 +626,25 @@ describe("Hyperbone model", function(){
 			var m = new Model({
 				_links : {
 					"cmds:one" : {
-						href : "#_commands/edit/create"
+						href : "#_commands/create"
 					},
 					"cmds:two" : {
-						href : "#commands/edit/create"
+						href : "#commands/create"
 					},
 					"cmds:three" : {
-						href : "#command/edit/create"
+						href : "#command/create"
 					}
 				},
 				_commands : {
-					edit : {
-						create : {
-							href: "/create",
-							method : "POST",
-							encoding : "application/x-www-form-urlencoded",
-							properties : {
-								name : "Default",
-								description : "Default"
+					create : {
+						href: "/create",
+						method : "POST",
+						encoding : "application/x-www-form-urlencoded",
+						properties : {
+							name : "Default",
+							description : "Default"
 
-							}
 						}
-
 					}
 				}
 
@@ -667,41 +658,24 @@ describe("Hyperbone model", function(){
 
 		});
 
-		it("returns a command via a direct reference", function(){
-
-			var m = new Model( useFixture('/tasklist') );
-
-			expect( m.command("edit.create-task") ).to.be.ok;
-			expect( m.get("task[0]").command("edit.edit-task") ).to.be.ok;
-
-		});
-
 		it("Exposes a properties method for acessing the properties directly", function(){
 
 			var m = new Model({
-				_links : {
-					"cmds:two" : {
-						href : "#_commands/edit/create"
-					}
-				},
 				_commands : {
-					edit : {
-						create : {
-							href: "/create",
-							method : "POST",
-							encoding : "application/x-www-form-urlencoded",
-							properties : {
-								name : "Default",
-								description : "Default description"
-							}
+					create : {
+						href: "/create",
+						method : "POST",
+						encoding : "application/x-www-form-urlencoded",
+						properties : {
+							name : "Default",
+							description : "Default description"
 						}
-
 					}
 				}
 
 			});
 
-			var properties = m.command('cmds:two').properties();
+			var properties = m.command('create').properties();
 
 			expect(properties.get('name')).to.equal('Default');
 
@@ -710,32 +684,24 @@ describe("Hyperbone model", function(){
 		it("can pull data from the parent model", function(){
 
 			var m = new Model({
-				_links : {
-					"cmds:two" : {
-						href : "#_commands/edit/create"
-					}
-				},
 				name : "Not default",
 				description : "Not default description",
 				bugger : 'this',
 				_commands : {
-					edit : {
-						create : {
-							href: "/create",
-							method : "POST",
-							encoding : "application/x-www-form-urlencoded",
-							properties : {
-								name : "Default",
-								description : "Default description"
-							}
+					create : {
+						href: "/create",
+						method : "POST",
+						encoding : "application/x-www-form-urlencoded",
+						properties : {
+							name : "Default",
+							description : "Default description"
 						}
-
 					}
 				}
 
 			});
 
-			var cmd = m.command('cmds:two');
+			var cmd = m.command('create');
 			var properties = cmd.properties();
 
 			cmd.pull();
@@ -748,33 +714,25 @@ describe("Hyperbone model", function(){
 
 		it("can push data to the parent model", function(){
 
-				var m = new Model({
-				_links : {
-					"cmds:two" : {
-						href : "#_commands/edit/create"
-					}
-				},
+			var m = new Model({
 				name : "Not default",
 				description : "Not default description",
 				bugger : 'this',
 				_commands : {
-					edit : {
-						create : {
-							href: "/create",
-							method : "POST",
-							encoding : "application/x-www-form-urlencoded",
-							properties : {
-								name : "Default",
-								description : "Default description"
-							}
+					create : {
+						href: "/create",
+						method : "POST",
+						encoding : "application/x-www-form-urlencoded",
+						properties : {
+							name : "Default",
+							description : "Default description"
 						}
-
 					}
 				}
 
 			});
 
-			var cmd = m.command('cmds:two');
+			var cmd = m.command('create');
 			var properties = cmd.properties();
 
 			cmd.push();
@@ -788,46 +746,35 @@ describe("Hyperbone model", function(){
 		it('can push data to another command', function(){
 
 			var m = new Model({
-				_links : {
-					"cmds:two" : {
-						href : "#_commands/edit/create"
-					},
-					"cmds:one" : {
-						href : "#_commands/edit/other-create"
-					}
-				},
 				name : "Not default",
 				description : "Not default description",
 				bugger : 'this',
 				_commands : {
-					edit : {
-						create : {
-							href: "/create",
-							method : "POST",
-							encoding : "application/x-www-form-urlencoded",
-							properties : {
-								name : "Default",
-								description : "Default description"
-							}
-						},
-						"other-create" : {
-							href : "/other-create",
-							method : "PUT",
-							properties : {
-								name : "Something else",
-								description : "Flip and blast!",
-								randomness : "Hello!"
-							}
+					create : {
+						href: "/create",
+						method : "POST",
+						encoding : "application/x-www-form-urlencoded",
+						properties : {
+							name : "Default",
+							description : "Default description"
 						}
-
+					},
+					"other-create" : {
+						href : "/other-create",
+						method : "PUT",
+						properties : {
+							name : "Something else",
+							description : "Flip and blast!",
+							randomness : "Hello!"
+						}
 					}
 				}
 
 			});
 
-			m.command('cmds:one').pushTo( m.command('cmds:two') );
+			m.command('other-create').pushTo( m.command('create') );
 
-			var props = m.command('cmds:two').properties();
+			var props = m.command('create').properties();
 
 			expect( props.get('name') ).to.equal('Something else');
 			expect( props.get('description') ).to.equal('Flip and blast!');
@@ -838,50 +785,39 @@ describe("Hyperbone model", function(){
 		it("can pull data from another command", function(){
 
 			var m = new Model({
-				_links : {
-					"cmds:two" : {
-						href : "#_commands/edit/create"
-					},
-					"cmds:one" : {
-						href : "#_commands/edit/other-create"
-					}
-				},
 				name : "Not default",
 				description : "Not default description",
 				bugger : 'this',
 				_commands : {
-					edit : {
-						create : {
-							href: "/create",
-							method : "POST",
-							encoding : "application/x-www-form-urlencoded",
-							properties : {
-								name : "Default",
-								description : "Default description"
-							}
-						},
-						"other-create" : {
-							href : "/other-create",
-							method : "PUT",
-							properties : {
-								name : "Something else",
-								description : "Flip and blast!",
-								randomness : "Hello!"
-							}
+					create : {
+						href: "/create",
+						method : "POST",
+						encoding : "application/x-www-form-urlencoded",
+						properties : {
+							name : "Default",
+							description : "Default description"
 						}
-
+					},
+					"other-create" : {
+						href : "/other-create",
+						method : "PUT",
+						properties : {
+							name : "Something else",
+							description : "Flip and blast!",
+							randomness : "Hello!"
+						}
 					}
 				}
 
 			});
 
-			m.command('cmds:two').pullFrom( m.command('cmds:one') );
+			m.command('other-create').pullFrom( m.command('create') );
 
-			var props = m.command('cmds:two').properties();
+			var props = m.command('other-create').properties();
 
-			expect( props.get('name') ).to.equal('Something else');
-			expect( props.get('description') ).to.equal('Flip and blast!');
-			expect( props.get('randomness') ).to.equal(null);
+			expect( props.get('name') ).to.equal('Default');
+			expect( props.get('description') ).to.equal('Default description');
+			expect( props.get('randomness') ).to.equal( 'Hello!' );
 
 		});
 
@@ -982,19 +918,17 @@ describe("Hyperbone model", function(){
 			var m = new Proto({
 				"otherThing" : 'From Data',
 				_commands : {
-					flip : {
-						test : {
-							method : 'PUT',
-							href : "/test",
-							properties : {
-								"test" : "From Model"
-							}
+					test : {
+						method : 'PUT',
+						href : "/test",
+						properties : {
+							"test" : "From Model"
 						}
 					}
 				}
 			});
 
-			var cmd = m.command('flip.test');
+			var cmd = m.command('test');
 
 			expect( cmd.properties().get('test') ).to.equal('From Model');
 
@@ -1009,13 +943,11 @@ describe("Hyperbone model", function(){
 			m.reinit({
 				"otherThing" : 'From New Data',
 				_commands : {
-					flip : {
-						test : {
-							method : 'PUT',
-							href : '/test',
-							properties : {
-								'test' : 'From New Data'
-							}
+					test : {
+						method : 'PUT',
+						href : '/test',
+						properties : {
+							'test' : 'From New Data'
 						}
 					}
 				}
@@ -1040,50 +972,6 @@ describe("Hyperbone model", function(){
 			var m = new ParsedModel({ url : '/hello-world' });
 
 			expect(m.url()).to.equal('/hello-world');
-		});
-
-	});
-
-	describe("Reinitialising embedded commands", function(){
-
-		var Model = require('hyperbone-model').Model;
-		it('correctly updates the properties of a command loaded from _embedded', function(){
-
-			var m = new Model({
-				_embedded : {
-					thing : [{
-						_commands : {
-							test : {
-								href : '/test',
-								properties : {
-									one : 'original',
-									two : 'original'
-								}
-							}
-						}
-					}]
-				}
-			});
-
-			m.reinit({
-				_embedded : {
-					thing : [{
-						_commands : {
-							test : {
-								href : '/test',
-								properties : {
-									one : 'transformed',
-									two : 'transformed'
-								}
-							}
-						}
-					}]
-				}
-			});
-
-			expect( m.get('thing').at(0).command('test').properties().get('one') ).to.equal('transformed');
-			expect( m.get('thing').at(0).command('test').properties().get('two') ).to.equal('transformed');
-
 		});
 
 	});
@@ -1201,5 +1089,196 @@ describe("Hyperbone model", function(){
 		});
 
 	});
+
+	describe("Evented links (Issue #2)", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it('should issue a add-rel event when a new rel is found', function( done ){
+
+			var m = new Model();
+
+			m.on('add-rel:self', function(){
+
+				expect( m.rel('self') ).to.equal('/test');
+				done();
+
+			});
+
+			m.set({
+				_links : {
+					self : {
+						href : "/test"
+					}
+				}
+			});
+
+		});
+
+		it('should issue a remove-rel event when a new rel is found', function( done ){
+
+			var m = new Model({
+				_links : {
+					self : {
+						href : "/self"
+					},
+					extra : {
+						href : "/extra"
+					}
+				}
+			});
+
+			m.on('remove-rel:extra', function(){
+
+				expect( m.rel('extra') ).to.equal( '' );
+				done();
+
+			});
+
+			m.set({
+				_links : {
+					self : {
+						href : "/self"
+					}
+				}
+			});
+
+		});
+
+
+		it('should issue a change-rel event when a rel is changed', function( done ){
+
+			var m = new Model({
+				_links : {
+					self : {
+						href : "/self"
+					}
+				}
+			});
+
+			m.on('change-rel:self', function(){
+
+				expect( m.rel('self') ).to.equal( '/transformed' );
+				done();
+
+			});
+
+			m.set({
+				_links : {
+					self : {
+						href : "/transformed"
+					}
+				}
+			});
+
+		});
+
+	});
+
+	describe("Evented commands (issue #6)", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it('should issue a add-command event when a command is found', function( done ){
+
+			var m = new Model();
+
+			m.on('add-command:some-command', function(){
+
+				expect( m.command('some-command') ).to.be.ok;
+				done();
+
+			});
+
+			m.set({
+				_commands : {
+					'some-command' : {
+						href : '/test', 
+						properties : {}
+					}
+				}
+			});
+
+		});
+
+		it('should issue a remove-command event when a command is removed', function( done ){
+
+			var m = new Model({
+				_commands : {
+					'some-command' : {
+						href: '/test',
+						properties : {}
+					}
+				}
+			});
+
+			m.on('remove-command:some-command', function(){
+
+				expect( m.command('some-command') ).to.be.ok;
+				done();
+
+			});
+
+			m.set({
+				_commands : {
+				}
+			});
+
+		});
+
+	});
+
+	describe("Issues", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it('should not throw an error when an unknown rel is requested (issue #4)', function(){
+
+			var m = new Model();
+
+			expect( m.rel('something') ).to.equal( "" );
+
+		});
+
+		it('correctly updates the properties of a command loaded from _embedded (issue #5)', function(){
+
+			var m = new Model({
+				_embedded : {
+					thing : [{
+						_commands : {
+							test : {
+								href : '/test',
+								properties : {
+									one : 'original',
+									two : 'original'
+								}
+							}
+						}
+					}]
+				}
+			});
+
+			m.reinit({
+				_embedded : {
+					thing : [{
+						_commands : {
+							test : {
+								href : '/test',
+								properties : {
+									one : 'transformed',
+									two : 'transformed'
+								}
+							}
+						}
+					}]
+				}
+			});
+
+			expect( m.get('thing').at(0).command('test').properties().get('one') ).to.equal('transformed');
+			expect( m.get('thing').at(0).command('test').properties().get('two') ).to.equal('transformed');
+
+		});
+
+	})
 
 });

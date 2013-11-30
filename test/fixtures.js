@@ -135,37 +135,19 @@ var fixtures = {
 				templated : true
 			},
 			"cmds:create-new" : {
-				href : "#_commands/edit/create-task"
+				href : "#_commands/create-task"
 			}
 		},
 		Count : 3,
 		_commands : {
-			edit : {
-				"create-task" : {
-					href : "/tasklist/create",
-					method : "POST",
-					encoding : "application/x-www-form-urlencoded",
-					properties : [
-						{
-							name : "description",
-							type : "text",
-							value : "",
-							placeholder : "Add description here",
-							required : "required"
-						},
-						{
-							name : "etag",
-							type : "hidden",
-							value : "adefdfad34246736"
-						},
-						{
-							name : "submit",
-							type : "submit",
-							value : "Save"
-						}
-					]
+			"create-task" : {
+				href : "/tasklist/create",
+				method : "POST",
+				encoding : "application/x-www-form-urlencoded",
+				properties : {
+					'description' : '',
+					'etag' : 'adefdfad34246736'
 				}
-
 			}
 		},
 		_embedded : {
@@ -181,13 +163,13 @@ var fixtures = {
 							templated : true
 						},
 						"cmds:complete" : {
-							href : '#_commands/edit/complete-some-task'
+							href : '#_commands/complete-some-task'
 						},
 						"cmds:edit" : {
-							href : '#_commands/edit/edit-task'
+							href : '#_commands/edit-task'
 						},
 						"cmds:delete" : {
-							href : '#_commands/edit/delete-task'
+							href : '#_commands/delete-task'
 						},
 					},
 					description : "Do this task",
@@ -196,200 +178,126 @@ var fixtures = {
 					last_updated : 1381580103672,
 					etag : "adefdfad34246736",
 					_commands : {
-						edit : {
-							"complete-some-task" : {
-								href : "/tasks/1/complete",
-								method : "PUT",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "etag",
-										type : "hidden",
-										value : "adefdfad34246736"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Complete"
-									}
-								]
-							},
-							"delete-task" : {
-								href : "delete-task",
-								action : "/tasks/1/delete",
-								method : "DELETE",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "etag",
-										type : "hidden",
-										value : "adefdfad34246736"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Delete"
-									}
-								]
+						"complete-some-task" : {
+							href : "/tasks/1/complete",
+							method : "PUT",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								'etag' : "adefdfad34246736"
+							}
+						},
+						"delete-task" : {
+							href : "delete-task",
+							action : "/tasks/1/delete",
+							method : "DELETE",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								'etag' : "adefdfad34246736"
+							}
 
+						},
+						"edit-task" : {
+							href : "/tasks/1/edit",
+							method : "PUT",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								'description' : 'Do this task',
+								'tasktype' : 'default',
+								'etag' : 'adefdfad34246736'
 							},
-							"edit-task" : {
-								href : "/tasks/1/edit",
-								method : "PUT",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "description",
-										type : "text",
-										value : "Do this task",
-										placeholder : "Add description here",
-										required : "required"
-									},
-									{
-										name : "tasktype",
-										type : "select",
-										options : [
-											{
-												name : "Default priority",
-												value : "default",
-												selected : "selected"
-											},
-											{
-												name : "Urgent",
-												value : "urgent"
-											},
-											{
-												name : "File 13",
-												value : "ignore"
-											}
-										]
-									},
-									{
-										name : "etag",
-										type : "hidden",
-										value : "adefdfad34246736"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Save"
-									}
-								]
-
+							schema : {
+								'tasktype' : {
+									options : [
+										{
+											name : 'Default priority',
+											value : 'default'
+										},
+										{
+											name : 'Urgent',
+											value : 'urgent'
+										},
+										{
+											name : 'File 13',
+											value : 'ignore'
+										}
+									]
+								}
 							}
 						}
-	
 					}
 				},
 				{
 					_links : {
 						self : {
-							href: "/tasks/2"
+							href: "/tasks/1"
 						},
 						curie : {
 							name : "cmds",
-							href : "/tasks/2/rels/{rel}",
+							href : "/tasks/1/rels/{rel}",
 							templated : true
 						},
 						"cmds:complete" : {
-							href : '#_commands/edit/complete-different-kind-of-task'
+							href : '#_commands/complete-some-task'
 						},
 						"cmds:edit" : {
-							href : '#_commands/edit/edit-task'
+							href : '#_commands/edit-task'
 						},
 						"cmds:delete" : {
-							href : '#_commands/edit/delete-task'
+							href : '#_commands/delete-task'
 						},
 					},
-					description : "Put the lotion in the basket",
-					tasktype : "Urgent",
-					created : 1381666804016,
-					last_updated : 1381666804016,
-					etag : "dadadcecdcadcecdcdcaec",
+					description : "Do this task",
+					tasktype : "Default priority",
+					created : 1381580070704,
+					last_updated : 1381580103672,
+					etag : "adefdfad34246736",
 					_commands : {
-						edit : {
-							"complete-different-kind-of-task" : {
-								href : "/tasks/2/complete",
-								method : "PUT",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "etag",
-										type : "hidden",
-										value : "dadadcecdcadcecdcdcaec"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Complete"
-									}
-								]
-							},
-							"delete-task" : {
-								href : "delete-task",
-								action : "/tasks/1/delete",
-								method : "DELETE",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "etag",
-										type : "hidden",
-										value : "dadadcecdcadcecdcdcaec"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Delete"
-									}
-								]
+						"complete-some-task" : {
+							href : "/tasks/1/complete",
+							method : "PUT",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								'etag' : "adefdfad34246736"
+							}
+						},
+						"delete-task" : {
+							href : "delete-task",
+							action : "/tasks/1/delete",
+							method : "DELETE",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								'etag' : "adefdfad34246736"
+							}
 
+						},
+						"edit-task" : {
+							href : "/tasks/1/edit",
+							method : "PUT",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								'description' : 'Do this task',
+								'tasktype' : 'default',
+								'etag' : 'adefdfad34246736'
 							},
-							"edit-task" : {
-								href : "/tasks/1/edit",
-								method : "PUT",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "description",
-										type : "text",
-										value : "Put the lotion in the basket",
-										placeholder : "Add description here",
-										required : "required"
-									},
-									{
-										name : "tasktype",
-										type : "select",
-										options : [
-											{
-												name : "Default",
-												value : "default"
-											},
-											{
-												name : "Urgent",
-												value : "urgent",
-												selected : "selected"
-											},
-											{
-												name : "File 13",
-												value : "ignore"
-											}
-										]
-									},
-									{
-										name : "etag",
-										type : "hidden",
-										value : "dadadcecdcadcecdcdcaec"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Save"
-									}
-								]
-
+							schema : {
+								'tasktype' : {
+									options : [
+										{
+											name : 'Default priority',
+											value : 'default'
+										},
+										{
+											name : 'Urgent',
+											value : 'urgent'
+										},
+										{
+											name : 'File 13',
+											value : 'ignore'
+										}
+									]
+								}
 							}
 						}
-	
 					}
 				},
 				{
@@ -403,13 +311,13 @@ var fixtures = {
 							templated : true
 						},
 						"cmds:complete" : {
-							href : '#_commands/edit/complete-yet-another-type-of-task'
+							href : '#_commands/complete-yet-another-type-of-task'
 						},
 						"cmds:edit" : {
-							href : '#_commands/edit/edit-task'
+							href : '#_commands/edit-task'
 						},
 						"cmds:delete" : {
-							href : '#_commands/edit/delete-task'
+							href : '#_commands/delete-task'
 						}
 					},
 					description : "Do this task",
@@ -418,88 +326,50 @@ var fixtures = {
 					last_updated : 1381679058602,
 					etag : "1758475ecdacdeacddecac",
 					_commands : {
-						edit : {
-							"complete-yet-another-type-of-task" : {
-								href : "/tasks/3/complete",
-								method : "PUT",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "etag",
-										type : "hidden",
-										value : "1758475ecdacdeacddecac"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Complete"
-									}
-								]
-							},
-							"delete-task" : {
-								href : "/tasks/3/delete",
-								method : "DELETE",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "etag",
-										type : "hidden",
-										value : "1758475ecdacdeacddecac"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Delete"
-									}
-								]
-
-							},
-							"edit-task" : {
-								href : "/tasks/3/edit",
-								method : "PUT",
-								encoding : "application/x-www-form-urlencoded",
-								properties : [
-									{
-										name : "description",
-										type : "text",
-										value : "Do this task",
-										placeholder : "Add description here",
-										required : "required"
-									},
-									{
-										name : "tasktype",
-										type : "select",
-										options : [
-											{
-												name : "Default priority",
-												value : "default",
-												selected : "selected"
-											},
-											{
-												name : "Urgent",
-												value : "urgent"
-											},
-											{
-												name : "File 13",
-												value : "ignore"
-											}
-										]
-									},
-									{
-										name : "etag",
-										type : "hidden",
-										value : "1758475ecdacdeacddecac"
-									},
-									{
-										name : "submit",
-										type : "submit",
-										value : "Save"
-									}
-								]
-
+						"complete-yet-another-type-of-task" : {
+							href : "/tasks/3/complete",
+							method : "PUT",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								'etag' : "1758475ecdacdeacddecac"
+							}
+						},
+						"delete-task" : {
+							href : "/tasks/3/delete",
+							method : "DELETE",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {  
+								"etag": "1758475ecdacdeacddecac"
+							}
+						},
+						"edit-task" : {
+							href : "/tasks/3/edit",
+							method : "PUT",
+							encoding : "application/x-www-form-urlencoded",
+							properties : {
+								"description" : "Do this task",
+								"tasktype" : "default",
+								"etag" : '1758475ecdacdeacddecac'
+							},						
+							schema : {
+								'tasktype' : {
+									options : [
+										{
+											name : 'Default priority',
+											value : 'default'
+										},
+										{
+											name : 'Urgent',
+											value : 'urgent'
+										},
+										{
+											name : 'File 13',
+											value : 'ignore'
+										}
+									]
+								}
 							}
 						}
-	
 					}
 				}
 			]

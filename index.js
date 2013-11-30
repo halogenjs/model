@@ -80,24 +80,47 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   parseHypermedia : function( attributes ){
 
-    var self = this;
+    var self = this, signals = [];
 
-    // parse links
-    this._links = attributes._links || {};
+    // update existing links for existing models
+    if(attributes._links && this._links){
+
+      _.each(attributes._links, function(val, id){
+        if(!this._links[id]){
+          signals.push(function(){
+              self.trigger('add-rel:' + id);
+          });
+        } else {
+          if(val.href !== this._links[id].href){
+            signals.push(function(){
+              self.trigger('change-rel:' + id);
+            });
+          }
+        }
+        this._links[id] = val;
+      }, this);
+      _.each(this._links, function(val, id){
+        if(!attributes._links[id]){
+          signals.push(function(){
+            delete self._links[id];
+            self.trigger('remove-rel:' + id);
+          });
+        }
+      }, this);
+    } else {
+      this._links = attributes._links || {};
+    }
     delete attributes._links;
 
     this._curies = {};
 
-    var curies = (  this._links ? this._links['curie'] ? [this._links['curie']] : (this._links['curies'] ? this._links['curies'] : null) : null  );
+    var curies = this._links['curie'] ? [this._links['curie']] : (this._links['curies'] ? this._links['curies'] : null);
 
     if (curies){
 
       _.each(curies, function(curie){
-
         if (!curie.templated) throw new Error("A curie without a template? What are you thinking?");
-
         this._curies[curie.name] = makeTemplate(curie.href);
-
       }, this);
 
     }
@@ -106,118 +129,81 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     _.each(this._links, function(link, id){
 
       if (_.isArray(link) && link.length === 1){
-
         this._links[id] = link[0];
-
       }
 
       if (link.templated){
-
         link.template = makeTemplate( link.href );
-
       }
 
     }, this);
 
     if (attributes._embedded){
-
       _.each(attributes._embedded, function(val, attr){
-
         attributes[attr] = val;
-
       });
-
       delete attributes._embedded;
-
     }
 
     if (attributes._commands){
 
       if (!this._commands){
         this._commands = new HyperboneModel();
+      } else {
+        // find any deleted commands and delete them...
+        _.each(this._commands.attributes, function(cmd, id){
+          if(!attributes._commands[id]){
+            signals.push(function(){
+              delete self._commands[id];
+              self.trigger('remove-command:' + id);
+            });
+          }
+        })
       }
 
-      var findCommands, foundCommands = [];
+      _.each(attributes._commands, function(cmd, id){
 
-      findCommands = function( obj, parentId){
-
-        var temp = {};
-
-        _.each(obj, function( o, id ){
-
-          var fullId;
-
-          if(parentId){
-
-            fullId = parentId + "." + id;
-
-          } else {
-
-            fullId = id;
-
-          }
-
-          if (o.properties){
-
-            if(self.command(fullId)){
-
-              var cmd = self.command(fullId);
-
-              _.each(o, function(value, key){
-                if (key !== 'properties'){
-                  cmd.set(key, value);
-                } else {
-                  
-                  _.each(value, function(value, key){
-                    cmd.set('properties.' + key, value);
-                  })
-                }
+        // is it an existing command?
+        var currentCmd; 
+        if(currentCmd = this.command(id)){ // assignment on purpose. DO NOT FIX.
+          _.each(cmd, function(value, key){
+            if (key !== 'properties'){
+              currentCmd.set(key, value);
+            } else {
+              _.each(value, function(value, key){
+                currentCmd.set('properties.' + key, value);
               });
-
-            }else{
-
-              temp[id] = new Command(o);
-              temp[id]._parentModel = self;
-              
-              _.each(temp[id].properties().attributes, function(value, key){
-                temp[id].properties().on("change:" + key, function(properties, value){
-                  self.trigger('change:' + key + ":" + id, temp[id], value);
-                });
-              });
-
-              if (!o.href){
-
-                temp[id].set("href", self.url(), { silent : true});
-
-              }
-              foundCommands.push(function(){
-                self.trigger('command-found:' + fullId);
-              });
-              
-
             }
+          });
+        } else {
+        // a new command?
+          this._commands.set(id, new Command(cmd));
+          var newCmd = this.command(id);
+          newCmd._parentModel = self;
+              
+          _.each(newCmd.properties().attributes, function(value, key){
+            newCmd.properties().on("change:" + key, function(properties, value){
+              self.trigger('change:' + key + ":" + id, newCmd, value);
+            });
+          });
 
-          } else {
-
-            temp[id] = findCommands(o, fullId);
-
+          if (!cmd.href){
+            newCmd.set("href", self.url(), { silent : true});
           }
+          signals.push(function(){
+            self.trigger('add-command:' + id);
+          });
 
-        });
+        }
 
-        return temp;
+      }, this);
 
-      };
-
-      this._commands.set(findCommands( attributes._commands ));
-
-      // publish signals for commands that have been found
-      _.each(foundCommands, function( fn ){
-        fn();
-      });
-
-      delete attributes._commands;      
+      delete attributes._commands;  
     }
+
+     _.each(signals, function( fn ){
+      fn();
+    });
 
     return attributes;
 
@@ -228,13 +214,23 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     var obj = {};
     _.each(this.attributes, function(attr, key){
 
-      if (attr.isHyperbone){
+      if (attr && attr.isHyperbone){
         obj[key] = attr.toJSON();
-      } else {
+      } else if(attr) {
         obj[key] = attr;
+      } else {
+        obj[key] = "";
       }
 
     }, this);
+
+    if(!_.isEmpty(this._links)){
+      obj._links = this.rels();
+    }
+    
+    if(this._commands){
+      obj._commands = this._commands.toJSON();
+    }
 
     return obj;
 
@@ -266,7 +262,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   get: function(attr) {
 
-    if (this.attributes[attr] || this.attributes[attr] === 0){ 
+    if (this.attributes[attr] || this.attributes[attr] === 0 || this.attributes[attr] === ""){ 
 
       return this.attributes[attr];
 
@@ -318,7 +314,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     return null;
 
-    },
+  },
 
   set: function(key, val, options) {
 
@@ -364,28 +360,28 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     // Check for changes of `id`.
     if (this.idAttribute in attrs) this.id = attrs[this.idAttribute];
 
-
-    // Recursively call set on nested models and collections
-    _.each(attrs, function(value, key){
-
-      if (_.isObject(value) && current[key] && current[key].isHyperbone){
-
-        if (_.isArray(value) || current[key].models){
-
-          value = (_.isArray(value) ? value : [value]);
-
-          // we're adding to a collection
-          if (value.length === 0 || current[key].length === 0){
-
-            current[key].reset(value);
-
-          } else {
-
-            if (current[key].length === value.length){
+    // Recursively call set on nested models and collections, if we're not
+    // a brand new model
+    if(!_.isEmpty(this.attributes)){
+      _.each(attrs, function(value, key){
+        // is it an object that currently exists in this model?
+        if (_.isObject(value) && current[key] && current[key].isHyperbone){
+          // is it an array, and we have a matching collection?
+          if (_.isArray(value) || current[key].models){
+            // if we have a collection but it's not an array, make it an array
+            value = (_.isArray(value) ? value : [value]);
+            // if the existing collection or the array has no members...
+            if (value.length === 0 || current[key].length === 0){
+              // call reset to minimise the number of events fired
+              current[key].reset(value);
+            // or if they have the same number of members we want 'change' events for 
+            // every model in the collection.
+            } else if (current[key].length === value.length){
               // we do a straight change operation on each
               current[key].each(function(model, index){
                 model.set(value[index]);
               });
+            // or if there's more in our collection than the array..
             } else if (current[key].length > value.length){
               // we need to remove some models
               var destroyers = [];
@@ -397,6 +393,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 }
               });
               _.each(destroyers, function(fn){fn();});
+            // or if there's less in our collection than the array...
             } else {
               // we need to add some models
               _.each(value, function(value, index){
@@ -407,57 +404,42 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 }
               });
             }
+            // clean up attributes
+            delete attrs[key];
+          } else {
+            // it exists in the current model, but it's not an array 
+            // so this is quite straightforward : recurse into set
+            current[key].set(value);
+            delete attrs[key];
           }
-
-          delete attrs[key];
-
-        } else {
-
-          current[key].set(value);
-          delete attrs[key];
         }
-
-      }
-      
-    });
-  
-
-    for (attr in attrs) {
-
+        
+      });
+    }
+    // having dealt with updating any nested models/collections, we 
+    // now do set for attributes for this particular model
+    _.each(attrs, function(val, attr){
+      // is the request a dot notation request?
       if (_.indexOf(attr, ".") !== -1 && !ignoreDotNotation){
-
+        // break it up, recusively call set..
         parts = attr.split('.');
         attr = parts.pop();
         var path = parts.join('.');
-
         this.get(path).set(attr, val);
-
       } else {
-
-          val = attrs[attr];
-
-          if (_.isObject(val) && !_.isArray(val)){
-
+        // is val an object?
+        if (_.isObject(val) && !_.isArray(val)){
+          // is it a plain old javascript object?
           if (!val.isHyperbone && !noTraverse){
-
             if (this._prototypes[attr]){
-
               Proto = this._prototypes[attr];
-
             } else {
-
               Proto = HyperboneModel;
-
             }
-
             val = new Proto( val );
-
             val._parent = self;
-
           }
-
           if (val.on){
-
             val._trigger = val.trigger;
             val.trigger = function(attr){
               return function(){
@@ -467,51 +449,36 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 self.trigger.apply(self, args);
               };
             }(attr);
-
           }
-
         } else if (_.isArray(val)){
-
+          // we only want to convert a an array of objects
+          // into a nested collection. Anything else is just added
+          // as a javascript array.
           var containsJustObjects = true;
 
           _.each(val, function( element ){
-
+            // deliberately making a function within a loop here
             if (!_.isObject(element)) containsJustObjects = false;
-
           });
-
           if (containsJustObjects){
-
             var elements = [];
-
+            // sort out our prototype
             if (this._prototypes[attr]){
-
               Proto = this._prototypes[attr];
-
             } else {
-
               Proto = HyperboneModel;
-
             }
-
+            // we want the default model to be a hyperbone model
+            // or whatever the user has selected as a prototype
             var EmbeddedCollection = Collection.extend({
-
               model : Proto
-
             });
-
+            // create an embedded collection..
             var collection = new EmbeddedCollection();
-
-            collection._parent = self;
-
-            _.each(val, function( element, id ){
-
-              elements.push( element );
-
-            }, this);
-
-            collection.add(elements);
-            
+            // add the array. Call reset so that we only get one event.
+            collection.reset(val);
+            // override the trigger method so we can efficently
+            // cascade events to the parent model
             collection._trigger = collection.trigger;
             collection.trigger = function(attr){
               return function(){
@@ -521,15 +488,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 self.trigger.apply(self, args);
               };
             }(attr);
-
+            // update the reference to val
             val = collection;
-            
           }
-
         }
-
-        }
-
+      }
       if (!_.isEqual(current[attr], val)) changes.push(attr);
       if (!_.isEqual(prev[attr], val)) {
         this.changed[attr] = val;
@@ -537,10 +500,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
         delete this.changed[attr];
       }
       unset ? delete current[attr] : current[attr] = val;
-    }
-
-  
-
+    }, this);
     // Trigger all relevant attribute changes.
     if (!silent) {
       if (changes.length) this._pending = true;
@@ -548,7 +508,6 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
           this.trigger('change:' + changes[i], this, current[changes[i]], options);
         }
       }
-
     // You might be wondering why there's a `while` loop here. Changes can
     // be recursively nested within `"change"` events.
     if (changing) return this;
@@ -566,74 +525,36 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
   rel : function( rel, data ){
 
     var link = this._links[rel] || {};
-
-    if (!link){
-
-      throw new Error("No such rel found");
-
-    }
-
+    if (!link) throw new Error("No such rel found");
     if (link.templated){
-
-      if (!data){
-
-        throw new Error("No data provided to expand templated uri");
-
-      } else {
-
-        return link.template.expand( data );
-
-      }
-
+      if (!data) throw new Error("No data provided to expand templated uri");
+      return link.template.expand( data );
     }
-
-
-    return this._links[rel].href ? this._links[rel].href : this._links[rel];
-
+    if(this._links && this._links[rel]) return this._links[rel].href ? this._links[rel].href : this._links[rel];
+    return "";
   },
 
   rels : function(){
-
     return this._links;
-
   },
 
   fullyQualifiedRel : function( rel ){
-
     var parts = rel.split(":");
-
     return this._curies[ parts[0] ].expand({ rel : parts[1] });
-
   },
 
   command : function( key ){
-
     var command;
-
     if (this._links[key] && this._commands){
-
       var parts = this._links[key].href.split(/\//g);
-
-      if (parts[0] === "#_commands" || parts[0] === "#commands" || parts[0] === "#command"){
-
-        parts = parts.slice(1);
-
-      }
-
+      if (parts[0] === "#_commands" || parts[0] === "#commands" || parts[0] === "#command") parts = parts.slice(1);
       command = this._commands.get( parts.join('.') );
-
     } else if(this._commands){
-
       command = this._commands.get( key );
-
     }
-
     if (command) return command;
-
     return null;
-
   }
-
 });
 
 HyperboneModel.extend = BackboneModel.extend;
@@ -660,7 +581,9 @@ Command = HyperboneModel.extend({
     var output = this.properties();
     var input = command.properties();
     _.each(output.attributes, function( value, key ){
-      output.set(key, input.get(key));
+      if(input.get(key)){
+        output.set(key, input.get(key));
+      }
     });
     return this;
   },
