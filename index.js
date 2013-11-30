@@ -35,6 +35,7 @@ var HyperboneModel = function(attributes, options){
 
   attributes || (attributes = {}); // this will cause a throw later on...
 
+  this._links = {};
   this.attributes = {};
   this.cid = _.uniqueId('c');
 
@@ -60,8 +61,6 @@ var HyperboneModel = function(attributes, options){
 
   attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
-  attributes = this.parseHypermedia( attributes );
-
   this.set(attributes, {silent : true});
 
   this.changed = {};
@@ -74,12 +73,6 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
   reinit : function( attributes, options ){
 
     attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
-
-    if ( this.parser ){
-      attributes = this.parseHypermedia( this.parser(attributes) );
-    } else {
-      attributes = this.parseHypermedia( attributes ) ;
-    }
 
     this.set(attributes);
 
@@ -331,6 +324,10 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     var self = this;
 
+    if(key && (key._links || key._commands || key._embedded)){
+      key = this.parseHypermedia(key);
+    }
+
     var attr, attrs, unset, changes, silent, changing, prev, current, Proto, parts;
     if (key == null) return this;
 
@@ -373,22 +370,44 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       if (_.isObject(value) && current[key] && current[key].isHyperbone){
 
-        if (_.isArray(value)){
+        if (_.isArray(value) || current[key].models){
+
+          value = (_.isArray(value) ? value : [value]);
 
           // we're adding to a collection
-          _.each(value, function( model, index){
+          if (value.length === 0 || current[key].length === 0){
 
-            if (current[key].at(index)){
+            current[key].reset(value);
 
-              current[key].at(index).set( model );
+          } else {
 
+            if (current[key].length === value.length){
+              // we do a straight change operation on each
+              current[key].each(function(model, index){
+                model.set(value[index]);
+              });
+            } else if (current[key].length > value.length){
+              // we need to remove some models
+              var destroyers = [];
+               current[key].each(function(model, index){
+                if(value[index]){
+                  model.set(value[index]);
+                } else {
+                  destroyers.push(function(){model.remove();});
+                }
+              });
+              _.each(destroyers, function(fn){fn();});
             } else {
-
-              current[key].add( model );
-              
+              // we need to add some models
+              _.each(value, function(value, index){
+                if (current[key].at(index)){
+                  current[key].at(index).set(value);
+                } else {
+                  current[key].add(value);
+                }
+              });
             }
-
-          });
+          }
 
           delete attrs[key];
 

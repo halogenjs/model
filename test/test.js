@@ -34,9 +34,9 @@ describe("Hyperbone model", function(){
 
 			expect( m.get("anObject").get("name") ).to.equal("name inside an object");
 			expect( m.get("anObject").get("description") ).to.equal("description inside an object");
-			expect( function(){m.get("anObject").url()} ).to.throw("Not a hypermedia resource");
+			expect( function(){m.get("anObject").url();} ).to.throw("Not a hypermedia resource");
 
-		});		
+		});
 
 		it("triggers correct change events when child model changed", function( done ){
 
@@ -73,7 +73,7 @@ describe("Hyperbone model", function(){
 
 			expect( m.get("anArrayofObjects").length ).to.equal(3);
 			expect( m.get("anArrayofObjects").at(0).get("name") ).to.equal("obj 1");
-			expect( function(){ m.get("anArrayofObjects").at(0).url()} ).to.throw("Not a hypermedia resource");
+			expect( function(){ m.get("anArrayofObjects").at(0).url();} ).to.throw("Not a hypermedia resource");
 
 		});
 
@@ -120,8 +120,8 @@ describe("Hyperbone model", function(){
 						kbo : {
 							lol : "rofl!"
 						}
-					}					
-				}				
+					}
+				}
 			});
 
 			expect( m.get("foo.bar.kbo.lol") ).to.equal("rofl!");
@@ -136,8 +136,8 @@ describe("Hyperbone model", function(){
 						kbo : {
 							lol : "rofl!"
 						}
-					}					
-				}				
+					}
+				}
 			});
 
 			m.set("foo.bar.kbo.lol", "hello");
@@ -185,8 +185,8 @@ describe("Hyperbone model", function(){
 				foo : {
 					bar : {
 						kbo : "lol"
-					}					
-				}				
+					}
+				}
 			});
 
 			m.get("foo.bar").on("change:kbo", function(){
@@ -208,25 +208,25 @@ describe("Hyperbone model", function(){
 					{
 						bar : {
 							kbo : "lol"
-						}	
+						}
 					},
 					{
 						bar : {
-							kbo : "haha"							
-						}						
+							kbo : "haha"
+						}
 					}
-				]						
+				]
 			});
 
-			m.get("foo[0].bar").on("change:kbo", function(){
+			m.get("foo[0].bar").on('change:hbo', function(){
 
-				expect( m.get("foo[0].bar.kbo") ).to.equal("rofl");
-
+				expect(this.get('hbo')).to.equal('chuckles');
 				done();
 
 			});
 
-			m.set({ foo : [ { bar : { kbo : "rofl"} } , { bar : { kbo : "chuckles"} } ] });
+
+			m.get("foo[0].bar").set('hbo', 'chuckles');
 
 		});
 
@@ -236,14 +236,14 @@ describe("Hyperbone model", function(){
 				foo : {
 					bar : {
 						kbo : "lol"
-					}					
-				}				
+					}
+				}
 			});
 
 			var b = new Model({
 				cake : {
 					lie : "true"
-				}								
+				}
 			});
 
 			expect( m.set("sub", { el : "hello",  }) ).to.be.ok;
@@ -297,7 +297,7 @@ describe("Hyperbone model", function(){
 					brand : "google",
 					app : "mail"
 				}
-			})
+			});
 
 			var json = m.toJSON();
 
@@ -321,12 +321,12 @@ describe("Hyperbone model", function(){
 					brand : "google",
 					app : "mail"
 				}
-			})
+			});
 
-		})
+		});
 
 
-	})
+	});
 
 	describe("Embedding", function(){
 
@@ -345,7 +345,7 @@ describe("Hyperbone model", function(){
 
 			var m = new Model( useFixture('/embed-test') );
 
-			expect( m.get("multiple-items").length ).to.equal(3)
+			expect( m.get("multiple-items").length ).to.equal(3);
 
 		});
 
@@ -409,7 +409,7 @@ describe("Hyperbone model", function(){
 			expect( m.get("tests").at(2).get("rofl") ).to.equal("hehe");
 
 
-		})
+		});
 
 	});
 
@@ -446,7 +446,7 @@ describe("Hyperbone model", function(){
 			expect( m.url() ).to.equal("/not-test");
 			expect( m.rel("self") ).to.equal("/not-test");
 
-		});	
+		});
 
 		it("can set and get other rels", function(){
 
@@ -471,7 +471,7 @@ describe("Hyperbone model", function(){
 
 			var m = new Model( useFixture('/services_curie') );
 
-			expect( function(){ m.rel("app:thing" ) } ).to.throw("No data provided to expand templated uri");
+			expect( function(){ m.rel("app:thing" ); } ).to.throw("No data provided to expand templated uri");
 			expect( m.rel("app:thing", { id: "lol" }) ).to.equal("/services/thing/lol");
 
 		});
@@ -499,7 +499,7 @@ describe("Hyperbone model", function(){
 			expect( m.rel('others').length ).to.equal(3);
 			expect( m.rel('others')[1].href ).to.equal('/two');
 
-		})
+		});
 
 		it("automatically collapses arrays of one", function(){
 
@@ -618,7 +618,7 @@ describe("Hyperbone model", function(){
 					}
 				}
 
-			}); 
+			});
 
 			expect( m.command("cmds:test").get("href") ).to.equal("/create");
 
@@ -733,7 +733,7 @@ describe("Hyperbone model", function(){
 					}
 				}
 
-			});	
+			});
 
 			var cmd = m.command('cmds:two');
 			var properties = cmd.properties();
@@ -772,7 +772,7 @@ describe("Hyperbone model", function(){
 					}
 				}
 
-			});	
+			});
 
 			var cmd = m.command('cmds:two');
 			var properties = cmd.properties();
@@ -781,7 +781,7 @@ describe("Hyperbone model", function(){
 
 			expect(m.get('name')).to.equal('Default');
 			expect(m.get('description')).to.equal('Default description');
-			expect(m.get('bugger')).to.equal('this');		
+			expect(m.get('bugger')).to.equal('this');
 
 		});
 
@@ -883,7 +883,7 @@ describe("Hyperbone model", function(){
 			expect( props.get('description') ).to.equal('Flip and blast!');
 			expect( props.get('randomness') ).to.equal(null);
 
-		})
+		});
 
 	});
 
@@ -903,7 +903,8 @@ describe("Hyperbone model", function(){
 
 			var Proto = Model.extend({
 				defaults : {
-					"test" : "From Model"
+					"test" : "From Model",
+					"collection" : []
 				}
 			});
 
@@ -913,16 +914,21 @@ describe("Hyperbone model", function(){
 
 			expect(m.get('test')).to.equal('From Model');
 			expect(m.get('otherThing')).to.equal('From Data');
+			expect(m.get('collection').length).to.equal(0);
 
 			m.set('test', 'From Code');
-
 			expect(m.get('test')).to.equal('From Code');
+
+			m.set('collection', [{ test : 'From Code'}]);
+
+			expect(m.get('collection').length).to.equal(1);
 
 			m.reinit({
 				otherThing : 'From New Data'
 			});
 
 			expect(m.get('test')).to.equal('From Model');
+			expect(m.get('collection').length).to.equal(0);
 
 		});
 
@@ -960,7 +966,7 @@ describe("Hyperbone model", function(){
 			});
 
 			m.reinit({
-				otherThing : "From New Data"		
+				otherThing : "From New Data"
 			});
 
 		});
@@ -1027,15 +1033,173 @@ describe("Hyperbone model", function(){
 
 			var ParsedModel = Model.extend({
 				parser : function( source ){
-					return { _links : {self : {href : source.url }}}
+					return { _links : {self : {href : source.url }}};
 				}
 			});
 
 			var m = new ParsedModel({ url : '/hello-world' });
 
 			expect(m.url()).to.equal('/hello-world');
-		})
+		});
 
-	})
+	});
+
+	describe("Reinitialising embedded commands", function(){
+
+		var Model = require('hyperbone-model').Model;
+		it('correctly updates the properties of a command loaded from _embedded', function(){
+
+			var m = new Model({
+				_embedded : {
+					thing : [{
+						_commands : {
+							test : {
+								href : '/test',
+								properties : {
+									one : 'original',
+									two : 'original'
+								}
+							}
+						}
+					}]
+				}
+			});
+
+			m.reinit({
+				_embedded : {
+					thing : [{
+						_commands : {
+							test : {
+								href : '/test',
+								properties : {
+									one : 'transformed',
+									two : 'transformed'
+								}
+							}
+						}
+					}]
+				}
+			});
+
+			expect( m.get('thing').at(0).command('test').properties().get('one') ).to.equal('transformed');
+			expect( m.get('thing').at(0).command('test').properties().get('two') ).to.equal('transformed');
+
+		});
+
+	});
+
+	describe("Nested collections", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it('issues reset event when the collection is emptied', function( done ){
+
+			var m = new Model({
+				collection : [
+					{
+						value : 'test'
+					}
+				]
+			});
+
+			m.on('reset:collection', function(){
+
+				expect(m.get('collection').length).to.equal(0);
+				done();
+
+			});
+
+			m.set('collection', []);
+
+		});
+
+
+		it('issues change events when a model in a collection is updated (when passed array)', function( done ){
+
+			var m = new Model({
+				collection : [
+					{
+						value : 'test'
+					}
+				]
+			});
+
+			m.get('collection').at(0).on('change', function(){
+
+				expect(this.get('value')).to.equal('transformed');
+				done();
+
+			});
+
+			m.set('collection', [{ value : 'transformed'}]);		
+
+		});
+
+
+		it('issues change events when a model in a collection is updated (when passed single object)', function( done ){
+
+			var m = new Model({
+				collection : [
+					{
+						value : 'test'
+					}
+				]
+			});
+
+			m.get('collection').at(0).on('change', function(){
+
+				expect(this.get('value')).to.equal('transformed');
+				done();
+
+			});
+
+			m.set('collection', { value : 'transformed'});		
+
+		});
+
+		it('issues add event when a model is added', function( done ){
+
+			var m = new Model({
+				collection : [
+					{
+						value : 'test'
+					}
+				]
+			});
+
+			m.get('collection').on('add', function(){
+
+				expect(this.at(0).get('value')).to.equal('transformed');
+				expect(this.at(1).get('value')).to.equal('brand new');
+				done();
+
+			});
+
+			m.set('collection', [{ value : 'transformed'}, { value : 'brand new'}]);			
+
+		});
+
+		it('issues a remove event when a model is removed', function(){
+
+			var m = new Model({
+				collection : [
+					{
+						value : 'test'
+					}
+				]
+			});
+
+			m.get('collection').on('remove', function(){
+
+				expect(this.length).to.equal(0);
+				done();
+
+			});
+
+			m.set('collection', []);	
+
+		});
+
+	});
 
 });
