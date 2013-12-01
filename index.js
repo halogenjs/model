@@ -371,8 +371,26 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
         if (_.isObject(value) && current[key] && current[key].isHyperbone){
           // is it an array, and we have a matching collection?
           if (_.isArray(value) || current[key].models){
+
+            var Proto;
             // if we have a collection but it's not an array, make it an array
             value = (_.isArray(value) ? value : [value]);
+            // if we have an array but current[key]is a model, make it a collection
+            if(current[key].attributes){
+              if (this._prototypes[attr]){
+                Proto = this._prototypes[attr];
+              } else {
+                Proto = HyperboneModel;
+              }
+              // we want the default model to be a hyperbone model
+              // or whatever the user has selected as a prototype
+              var EmbeddedCollection = Collection.extend({
+                model : Proto
+              });
+              // create an embedded collection..
+              var collection = new EmbeddedCollection().add(current[key]);
+              current[key] = collection;
+            }
             // if the existing collection or the array has no members...
             if (value.length === 0 || current[key].length === 0){
               // call reset to minimise the number of events fired
@@ -392,7 +410,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 if(value[index]){
                   model.set(value[index]);
                 } else {
-                  destroyers.push(function(){model.remove();});
+                  destroyers.push(function(){current[key].remove(model);});
                 }
               });
               _.each(destroyers, function(fn){fn();});
