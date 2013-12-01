@@ -1214,7 +1214,7 @@ describe("Hyperbone model", function(){
 
 			m.on('remove-command:some-command', function(){
 
-				expect( m.command('some-command') ).to.be.ok;
+				expect( m.command('some-command') ).to.not.be.ok;
 				done();
 
 			});

@@ -154,7 +154,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
         _.each(this._commands.attributes, function(cmd, id){
           if(!attributes._commands[id]){
             signals.push(function(){
-              delete self._commands[id];
+              self.command(id).reset();
+              delete self._commands.attributes[id];
               self.trigger('remove-command:' + id);
             });
           }
@@ -565,6 +566,11 @@ Command = HyperboneModel.extend({
     method : "",
     href : "",
     properties : {}
+  },
+  reset : function(){
+    // completely remove all bound events before destroying.
+    this.off();
+    this.properties().off();
   },
   properties : function(){
     return this.get('properties');
