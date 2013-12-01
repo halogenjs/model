@@ -74,6 +74,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
+    if(this.parser) attributes = this.parser(attributes);
+
     this.set(attributes);
 
   },
