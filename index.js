@@ -167,7 +167,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
       _.each(attributes._commands, function(cmd, id){
 
         // is it an existing command?
-        var currentCmd; 
+        var currentCmd;
         if(currentCmd = this.command(id)){ // assignment on purpose. DO NOT FIX.
           _.each(cmd, function(value, key){
             if (key !== 'properties'){
@@ -176,6 +176,9 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
               _.each(value, function(value, key){
                 currentCmd.set('properties.' + key, value);
               });
+            }
+            if(!cmd.href){
+              currentCmd.set('href', self.url(), { silent : true });
             }
           });
         } else {
