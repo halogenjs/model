@@ -1228,6 +1228,232 @@ describe("Hyperbone model", function(){
 
 	});
 
+	describe("syncCommands flag: Keeping commands in sync with the parent model automatically", function(){
+
+		var Model = require('hyperbone-model').Model;
+
+		it('automatically updates all identically named command properties that have the same value as the parent model on initialisation', function(){
+
+			var m = new Model({
+				syncCommands : true,
+				_commands : {
+					'test1' : {
+						method : 'socket',
+						href : '/execute-test',
+						properties : {
+							'Foo' : 'Hello',
+							_method : "PUT"
+						}
+
+					},
+					'test2' : {
+						method : 'PUT',
+						href : '/execute-test-2',
+						properties : {
+							'Foo' : 'Hello',
+							'Bar' : 'World'
+						}
+					},
+					'test3' : {
+						method : 'POST',
+						href : '/execute-test-3',
+						properties : {
+							'Foo' : '',
+							'Bar' : ''
+						}
+					}
+				},
+				'Foo' : 'Hello',
+				'Bar' : 'World'
+			});
+
+			m.set('Foo', 'Push this to the commands');
+			m.set('Bar', 'Also this')
+
+			// pushes to test1 and test2 because they had the same value, 'Hello', when the model was
+			// initialised
+			expect( m.command('test1').properties().get('Foo') ).to.equal('Push this to the commands');
+			expect( m.command('test2').properties().get('Foo') ).to.equal('Push this to the commands');
+			expect( m.command('test2').properties().get('Bar') ).to.equal('Also this');
+
+			// Does not push to test3.properties.Foo because that had a different value. They cannot and
+			// should not be automatically paired.
+			expect( m.command('test3').properties().get('Foo') ).to.equal('');
+			expect( m.command('test3').properties().get('Bar') ).to.equal('');
+
+		});
+
+		it('automatically propagates changes to the parent model and to other commands when ', function(){
+
+		
+			var m = new Model({
+				syncCommands : true,
+				_commands : {
+					'test1' : {
+						method : 'socket',
+						href : '/execute-test',
+						properties : {
+							'Foo' : 'Hello',
+							_method : "PUT"
+						}
+
+					},
+					'test2' : {
+						method : 'PUT',
+						href : '/execute-test-2',
+						properties : {
+							'Foo' : 'Hello',
+							'Bar' : 'World'
+						}
+					},
+					'test3' : {
+						method : 'POST',
+						href : '/execute-test-3',
+						properties : {
+							'Foo' : '',
+							'Bar' : ''
+						}
+					}
+				},
+				'Foo' : 'Hello',
+				'Bar' : 'World'
+			});
+
+			m.command('test1').properties().set('Foo', 'Push this to the parent and other commands');
+			m.command('test2').properties().set('Bar', 'Also this')
+
+			// pushes to parent.Foo and test2.properties.Foo because they all had the same value for Foo, 'Hello', when the model was
+			// initialised
+			expect( m.get('Foo') ).to.equal('Push this to the parent and other commands');
+			expect( m.command('test2').properties().get('Foo') ).to.equal('Push this to the parent and other commands');
+
+
+			expect( m.get('Bar') ).to.equal('Also this');
+
+			// Does not push to test3.properties.Foo because that had a different value. They cannot and
+			// should not be automatically paired.
+			expect( m.command('test3').properties().get('Foo') ).to.equal('');
+			expect( m.command('test3').properties().get('Bar') ).to.equal('');
+
+		});
+
+		it("isn't sick on itself if a command gets removed later on", function(){
+
+			var m = new Model({
+				syncCommands : true,
+				_commands : {
+					'test1' : {
+						method : 'socket',
+						href : '/execute-test',
+						properties : {
+							'Foo' : 'Hello',
+							_method : "PUT"
+						}
+
+					},
+					'test2' : {
+						method : 'PUT',
+						href : '/execute-test-2',
+						properties : {
+							'Foo' : 'Hello',
+							'Bar' : 'World'
+						}
+					},
+					'test3' : {
+						method : 'POST',
+						href : '/execute-test-3',
+						properties : {
+							'Foo' : '',
+							'Bar' : ''
+						}
+					}
+				},
+				'Foo' : 'Hello',
+				'Bar' : 'World'
+			});
+
+			m.reinit({
+				'Foo' : 'Hello',
+				'Bar' : 'World',
+				_commands : {
+
+				}
+			});
+
+			m.set('Foo', 'This should not throw an error');
+
+		});
+
+		it("can sync with commands that appear later on.. ", function(){
+
+			// initial state, no commands...
+			var m = new Model({
+				'Foo' : '',
+				'Bar' : '',
+				_commands : {
+					
+				},
+				syncCommands : true
+			});
+
+			// new initial state, lots of commands
+			m.reinit({
+				_commands : {
+					'test1' : {
+						method : 'socket',
+						href : '/execute-test',
+						properties : {
+							'Foo' : 'Hello',
+							_method : "PUT"
+						}
+
+					},
+					'test2' : {
+						method : 'PUT',
+						href : '/execute-test-2',
+						properties : {
+							'Foo' : 'Hello',
+							'Bar' : 'World'
+						}
+					},
+					'test3' : {
+						method : 'POST',
+						href : '/execute-test-3',
+						properties : {
+							'Foo' : '',
+							'Bar' : ''
+						}
+					}
+				},
+				'Foo' : 'Hello',
+				'Bar' : 'World'
+			});
+
+			m.set('Foo', 'Push this to the commands');
+			m.set('Bar', 'Also this');
+
+						// pushes to test1 and test2 because they had the same value, 'Hello', when the model was
+			// initialised
+			expect( m.command('test1').properties().get('Foo') ).to.equal('Push this to the commands');
+			expect( m.command('test2').properties().get('Foo') ).to.equal('Push this to the commands');
+			expect( m.command('test2').properties().get('Bar') ).to.equal('Also this');
+
+
+			m.command('test1').properties().set('Foo', 'Push this to the parent and other commands');
+			m.command('test2').properties().set('Bar', 'Also this')
+
+			// pushes to parent.Foo and test2.properties.Foo because they all had the same value for Foo, 'Hello', when the model was
+			// initialised
+			expect( m.get('Foo') ).to.equal('Push this to the parent and other commands');
+			expect( m.command('test2').properties().get('Foo') ).to.equal('Push this to the parent and other commands');
+
+
+			expect( m.get('Bar') ).to.equal('Also this');
+		});
+
+
+	});
+
 	describe("Issues", function(){
 
 		var Model = require('hyperbone-model').Model;

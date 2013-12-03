@@ -413,6 +413,25 @@ Get the command model via rel or via dot notation.
 
 The convention is that an internal rel to a command can begin `#commands` or `#_commands` or `#command` and then the path to the specific command is separated by a slash. 
 
+## Command / Parent Model synchronisation
+
+It's quite a common usecase that a command's data is actually related to data in the parent model.
+
+```js
+model.get('Username'); // "Terry Wogan"
+model.command('edit-user').properties().get('Username'); // "Terry Wogan"
+```
+
+Hyperbone Model offers a method to automatically detect these and then keep them automatically synchronised. In a way this behaviour emulates the classic Backbone developer experience, where you bind a view to your model, manipulate just that model and then, when you're wanting to persist something you execute a command (which handily has any changes made to the parent model reflected in it automatically).
+
+To use Command/Model sync, do:
+
+```js
+var synchronisedModel = new Model({ syncCommands : true });
+```
+
+When you first create a model or when you .reinit() the model, it will key value pairs in the model that match key value pairs in the commands. The keys and values have to be identical for automatic sync to be performed. 
+
 ## Command API
 
 After accessing a command, e.g., 

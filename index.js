@@ -42,12 +42,20 @@ var HyperboneModel = function(attributes, options){
   this.isHyperbone = true;
 
   if (!this._prototypes) this._prototypes = {};
+  if (!this.syncCommands) this.syncCommands = false;
 
   options || (options = {});
 
   if ( attributes._prototypes ){
     _.extend( this._prototypes, attributes._prototypes );
     delete attributes._prototypes;
+  }
+
+  if( attributes.syncCommands){ 
+    this.syncCommands = true;
+    this.syncEvents = []; // we keep a reference to any handlers we make so we can delete the old
+                          // ones if the model get reinitialised
+    delete attributes.syncCommands;
   }
 
   if ( options && options.collection ){
@@ -63,6 +71,10 @@ var HyperboneModel = function(attributes, options){
 
   this.set(attributes, {silent : true});
 
+  if(this.syncCommands){
+    this.reinitCommandSync();
+  }
+
   this.changed = {};
   this.initialize.apply(this, arguments);
 
@@ -77,6 +89,51 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     if(this.parser) attributes = this.parser(attributes);
 
     this.set(attributes);
+
+    if(this.syncCommands){
+      this.reinitCommandSync();
+    }
+
+  },
+
+  reinitCommandSync : function(){
+
+    var self = this;
+    // unsubscribe any existing sync handlers...
+    _.each(self.syncEvents, function(obj){
+      self.off(obj.event, obj.handler);
+    });
+
+    self.syncEvents = [];
+
+    _.each(self.attributes, function(val, attr){
+      // only interested in backbone style top level key values.
+      if (!_.isObject(val)){
+        _.each(self._commands.attributes, function( cmd ){
+          var props = cmd.properties();
+          if (props.get(attr) === val){
+            // we have a pair!!!
+            var ev = {
+              event : 'change:' + attr,
+              handler : function(model, newVal){
+                var curVal = props.get(attr);
+                if (curVal !== newVal){
+                  props.set(attr, newVal);
+                }
+              }
+            };
+            props.on(ev.event, function(model, newVal){
+              var curVal = self.get(attr);
+              if(curVal !== newVal){
+                self.set(attr, newVal);
+              }
+            });
+            self.on(ev.event, ev.handler);
+            self.syncEvents.push(ev);
+          }
+        });
+      }
+    });
 
   },
 
@@ -204,7 +261,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       }, this);
 
-      delete attributes._commands;  
+      delete attributes._commands;
     }
 
      _.each(signals, function( fn ){
