@@ -189,7 +189,25 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       if (_.isArray(link) && link.length === 1){
         this._links[id] = link[0];
+
+      } else if(_.isArray(link)){
+
+        _.each(link, function(link, id){
+
+          if (link.templated){
+            link.template = makeTemplate( link.href );
+          }
+
+        });
+
+      } else if (link.templated){
+          link.template = makeTemplate( link.href );
       }
+
+    }, this);
+
+    // make templates
+    _.each(this._links, function(link, id){
 
       if (link.templated){
         link.template = makeTemplate( link.href );
@@ -501,12 +519,13 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     // now do set for attributes for this particular model
     _.each(attrs, function(val, attr){
       // is the request a dot notation request?
-      if (_.indexOf(attr, ".") !== -1 && !ignoreDotNotation){
+      if (attr.indexOf('.') !== -1 && !ignoreDotNotation){
         // break it up, recusively call set..
         parts = attr.split('.');
         attr = parts.pop();
         var path = parts.join('.');
         this.get(path).set(attr, val);
+        
       } else {
         // is val an object?
         if (_.isObject(val) && !_.isArray(val)){
@@ -521,15 +540,17 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
             val._parent = self;
           }
           if (val.on){
-            val._trigger = val.trigger;
-            val.trigger = function(attr){
-              return function(){
-                var args = Array.prototype.slice.call(arguments, 0);
-                this._trigger.apply(this, args);
-                args[0] = args[0] + ":" + attr;
-                self.trigger.apply(self, args);
-              };
-            }(attr);
+            if(!val._trigger){
+              val._trigger = val.trigger;
+              val.trigger = function(attr){
+                return function(){
+                  var args = Array.prototype.slice.call(arguments, 0);
+                  this._trigger.apply(this, args);
+                  args[0] = args[0] + ":" + attr;
+                  self.trigger.apply(self, args);
+                };
+              }(attr);
+            }
           }
         } else if (_.isArray(val)){
           // we only want to convert a an array of objects
