@@ -249,13 +249,13 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
               currentCmd.set(key, value);
             } else {
               _.each(value, function(value, key){
-                currentCmd.set('properties.' + key, value);
+                currentCmd.properties().set(key, value);
               });
             }
-            if(!cmd.href){
-              currentCmd.set('href', self.url(), { silent : true });
-            }
           });
+          if(!cmd.href){
+            currentCmd.set('href', self.url(), { silent : true });
+          }
         } else {
         // a new command?
           this._commands.set(id, new Command(cmd));
@@ -297,7 +297,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       if (attr && attr.isHyperbone){
         obj[key] = attr.toJSON();
-      } else if(attr) {
+      } else if(attr || attr === 0 || attr === "") {
         obj[key] = attr;
       } else {
         obj[key] = "";
