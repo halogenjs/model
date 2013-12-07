@@ -297,7 +297,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
       if (attr && attr.isHyperbone){
         obj[key] = attr.toJSON();
-      } else if(attr) {
+      } else if(attr || attr === 0 || attr === "") {
         obj[key] = attr;
       } else {
         obj[key] = "";
