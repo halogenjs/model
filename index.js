@@ -108,7 +108,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
     _.each(self.attributes, function(val, attr){
       // only interested in backbone style top level key values.
-      if (!_.isObject(val)){
+      if (self._commands && !_.isObject(val)){
         _.each(self._commands.attributes, function( cmd ){
           var props = cmd.properties();
           if (props.get(attr) === val){
