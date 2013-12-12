@@ -455,8 +455,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
             value = (_.isArray(value) ? value : [value]);
             // if we have an array but current[key]is a model, make it a collection
             if(current[key].attributes){
-              if (this._prototypes[attr]){
-                Proto = this._prototypes[attr];
+              if (this._prototypes[key]){
+                Proto = this._prototypes[key];
               } else {
                 Proto = HyperboneModel;
               }
@@ -466,7 +466,8 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 model : Proto
               });
               // create an embedded collection..
-              var collection = new EmbeddedCollection().add(current[key]);
+              var collection = new EmbeddedCollection();
+              collection.add(current[key]);
               current[key] = collection;
             }
             // if the existing collection or the array has no members...
