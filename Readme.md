@@ -432,6 +432,22 @@ var synchronisedModel = new Model({ syncCommands : true });
 
 When you first create a model or when you .reinit() the model, it will key value pairs in the model that match key value pairs in the commands. The keys and values have to be identical for automatic sync to be performed. 
 
+### .getCommandProperty( property )
+
+```js
+model.command('command-name').properties().get('property-name');
+// or...
+model.getCommandProperty('command-name.property-name');
+```
+
+### .setCommandProperty( property )
+
+```js
+model.command('command-name').properties().set('property-name', "Hello world");
+// or... 
+model.setCommandProperty('command-name.property-name', "Hello world");
+```
+
 ## Command API
 
 After accessing a command, e.g., 
@@ -455,6 +471,10 @@ This is a shortcut for
 command.get('properties.name')
 // "Default name"
 ```
+
+### .property(property)
+
+Shortcut to .properties().get(property)
 
 ### .pull()
 

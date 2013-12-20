@@ -28,7 +28,7 @@ var makeTemplate = require('uritemplate').parse;
 
 var Command;
 
-var HyperboneModel = function(attributes, options){
+var HyperboneModel = function HyperboneModel (attributes, options){
 
   // we override the initial function because we need to force a hypermedia parse at the
   // instantiation stage, not just the fetch/sync stage
@@ -82,7 +82,7 @@ var HyperboneModel = function(attributes, options){
 
 _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
-  reinit : function( attributes, options ){
+  reinit : function reinitialiseModel ( attributes, options ){
 
     attributes = _.defaults({}, attributes, _.result(this, 'defaults'));
 
@@ -96,7 +96,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  reinitCommandSync : function(){
+  reinitCommandSync : function reinitCommands (){
 
     var self = this;
     // unsubscribe any existing sync handlers...
@@ -137,7 +137,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  parseHypermedia : function( attributes ){
+  parseHypermedia : function parseHypermedia( attributes ){
 
     var self = this, signals = [];
 
@@ -248,6 +248,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
             if (key !== 'properties'){
               currentCmd.set(key, value);
             } else {
+              _.each(currentCmd.properties().toJSON(), function (currentValue, key){
+                if(!value[key]){
+                  currentCmd.properties().unset(key, null);
+                }                
+              });
               _.each(value, function(value, key){
                 currentCmd.properties().set(key, value);
               });
@@ -290,7 +295,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  toJSON : function(){
+  toJSON : function toJSON (){
 
     var obj = {};
     _.each(this.attributes, function(attr, key){
@@ -317,7 +322,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  url : function( uri ){
+  url : function getUrl ( uri ){
 
     if ( uri ){
 
@@ -341,7 +346,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  get: function(attr) {
+  get: function hyperboneGet (attr) {
 
     if (this.attributes[attr] || this.attributes[attr] === 0 || this.attributes[attr] === ""){ 
 
@@ -397,7 +402,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  set: function(key, val, options) {
+  set: function hyperboneSet (key, val, options) {
 
     var self = this;
 
@@ -625,7 +630,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     return this;
   },
 
-  rel : function( rel, data ){
+  rel : function getRel ( rel, data ){
 
     var link = this._links[rel] || {};
     if (!link) throw new Error("No such rel found");
@@ -637,16 +642,16 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     return "";
   },
 
-  rels : function(){
+  rels : function listRels (){
     return this._links;
   },
 
-  fullyQualifiedRel : function( rel ){
+  fullyQualifiedRel : function getFullyQualifiedRel ( rel ){
     var parts = rel.split(":");
     return this._curies[ parts[0] ].expand({ rel : parts[1] });
   },
 
-  command : function( key ){
+  command : function getCommand ( key ){
     var command;
     if (this._links[key] && this._commands){
       var parts = this._links[key].href.split(/\//g);
@@ -657,7 +662,23 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     }
     if (command) return command;
     return null;
+  },
+
+  getCommandProperty : function getCommandProperty ( key ){
+
+    var bits = key.split('.');
+    return this.command(bits[0]).get('properties').get(bits[1]);
+
+  },
+
+  setCommandProperty : function setCommandProperty ( key, value ){
+
+    var bits = key.split('.');
+    this.command(bits[0]).get('properties').set(bits[1], value);
+    return this;
+
   }
+
 });
 
 HyperboneModel.extend = BackboneModel.extend;
@@ -676,6 +697,9 @@ Command = HyperboneModel.extend({
   },
   properties : function(){
     return this.get('properties');
+  },
+  property : function(prop){
+    return this.get('properties').get(prop);
   },
   pushTo : function( command ){
     var output = command.properties();

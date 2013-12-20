@@ -821,6 +821,102 @@ describe("Hyperbone model", function(){
 
 		});
 
+		it("can access a property with .property()", function(){
+
+			var m = new Model({
+				_commands : {
+					test : {
+						href : "/whatever",
+						method : "POST",
+						properties : {
+							staticproperty : "hello",
+							dynamicproperty : ""
+						}
+					}
+				}
+
+			});
+
+			expect( m.command('test').property('staticproperty') ).to.equal('hello');
+
+		});
+
+		it("can remove properties from commands if the comand changes", function(){
+
+			var m = new Model({
+				_commands : {
+					test : {
+						href : "/whatever",
+						method : "POST",
+						properties : {
+							staticproperty : "",
+							dynamicproperty : ""
+						}
+					}
+				}
+
+			});
+
+			expect( m.command('test').property('dynamicproperty') ).to.equal("");
+
+			m.reinit({
+				_commands : {
+					test : {
+						href : "/whatever",
+						method : "POST",
+						properties : {
+							staticproperty : ""
+						}
+					}
+				}				
+			});
+
+			expect( m.command('test').property('dynamicproperty') ).to.equal(null);
+
+		});
+
+		it('has a special getter for command properties', function (){
+
+			var m = new Model({
+				_commands : {
+					test : {
+						href : "/whatever",
+						method : "POST",
+						properties : {
+							staticproperty : "hello",
+							dynamicproperty : ""
+						}
+					}
+				}
+
+			});
+
+			expect( m.getCommandProperty('test.staticproperty') ).to.equal('hello');
+
+		});
+
+		it('has a special setter for command properties', function (){
+
+			var m = new Model({
+				_commands : {
+					test : {
+						href : "/whatever",
+						method : "POST",
+						properties : {
+							staticproperty : "hello",
+							dynamicproperty : ""
+						}
+					}
+				}
+
+			});
+
+			m.setCommandProperty('test.staticproperty', 'goodbye'); 
+
+			expect( m.getCommandProperty('test.staticproperty') ).to.equal('goodbye');
+
+		});
+
 	});
 
 	describe("Reloading hypermedia", function(){
