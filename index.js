@@ -261,23 +261,33 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
           if(!cmd.href){
             currentCmd.set('href', self.url(), { silent : true });
           }
+          currentCmd._isClean = true;
+          currentCmd._clean = currentCmd.properties().toJSON();
+          signals.push(function(){
+            self.trigger('clean:' + id);
+          });
         } else {
         // a new command?
           this._commands.set(id, new Command(cmd));
           var newCmd = this.command(id);
           newCmd._parentModel = self;
-              
+          newCmd._hbId = id;
           _.each(newCmd.properties().attributes, function(value, key){
             newCmd.properties().on("change:" + key, function(properties, value){
               self.trigger('change:' + key + ":" + id, newCmd, value);
+              newCmd._isClean = false;
+              self.trigger('dirty:' + id);
             });
           });
-
           if (!cmd.href){
             newCmd.set("href", self.url(), { silent : true});
           }
+          newCmd._isClean = true;
+          newCmd._clean = newCmd.properties().toJSON();
           signals.push(function(){
             self.trigger('add-command:' + id);
+            // it's brand new so it's always clean.
+            self.trigger('clean:' + id);
           });
 
         }
@@ -690,10 +700,24 @@ Command = HyperboneModel.extend({
     href : "",
     properties : {}
   },
+  initialize : function(){
+    var self = this;
+    this.on('clean', function(){
+      if(!self._isClean){
+        self.properties().set(self._clean);
+        self._isClean = true;
+        self._parentModel.trigger('clean:' + self._hbId);
+      }
+    });
+  },
   reset : function(){
     // completely remove all bound events before destroying.
     this.off();
     this.properties().off();
+  },
+  clean : function(){
+    this.trigger('clean');
+    return this;
   },
   properties : function(){
     return this.get('properties');

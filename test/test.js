@@ -917,6 +917,183 @@ describe("Hyperbone model", function(){
 
 		});
 
+		describe("Dirty/clean command extensions", function(){
+
+			it("Model publishes a clean event when a command is clean", function (done){
+
+				var m = new Model();
+
+				m.on('clean:test', function(){
+
+					expect(m.getCommandProperty('test.staticproperty')).to.equal('Hello');
+
+					done();
+
+				});
+
+				m.reinit({
+					_commands : {
+						test : {
+							href : "/whatever",
+							method : "POST",
+							properties : {
+								staticproperty : "Hello",
+								dynamicproperty : "World"
+							}
+						}
+
+					}
+				});
+
+			});
+
+			it("Model publishes a dirty event when a command is changed", function (done){
+
+				var m = new Model({
+					_commands : {
+						test : {
+							href : "/whatever",
+							method : "POST",
+							properties : {
+								staticproperty : "Hello",
+								dynamicproperty : "World"
+							}
+						}
+
+					}
+				});
+
+				m.on('dirty:test', function(){
+
+					expect(m.getCommandProperty('test.dynamicproperty')).to.equal('Wotcha wabbit!');
+
+					done();
+
+				});
+
+				m.setCommandProperty('test.dynamicproperty', 'Wotcha wabbit!');
+
+			});
+
+			it("has a clean method which restores them to initial state", function (){
+
+				var m = new Model({
+					_commands : {
+						test : {
+							href : "/whatever",
+							method : "POST",
+							properties : {
+								staticproperty : "Hello",
+								dynamicproperty : "World"
+							}
+						}
+
+					}
+				});
+
+				m.setCommandProperty('test.dynamicproperty', 'Wotcha wabbit!');
+
+				m.command('test').clean();
+
+				expect( m.getCommandProperty('test.dynamicproperty') ).to.equal('World');
+
+			});
+
+			it("fires a clean event after cleaning when using clean()", function(done){
+
+				var m = new Model({
+					_commands : {
+						test : {
+							href : "/whatever",
+							method : "POST",
+							properties : {
+								staticproperty : "Hello",
+								dynamicproperty : "World"
+							}
+						}
+
+					}
+				});
+
+				m.on('clean:test', function(){
+
+					expect(m.getCommandProperty('test.dynamicproperty')).to.equal('World');
+
+					done();
+
+				})
+
+				m.setCommandProperty('test.dynamicproperty', 'Wotcha wabbit!');
+
+				m.command('test').clean();
+
+			})
+
+			it("uses the clean state from the last reinit() rather than initial state", function (){
+
+				var m = new Model({
+					_commands : {
+						test : {
+							href : "/whatever",
+							method : "POST",
+							properties : {
+								staticproperty : "Hello",
+								dynamicproperty : "World"
+							}
+						}
+
+					}
+				});
+
+				m.reinit({
+					_commands : {
+						test : {
+							href : "/whatever",
+							method : "POST",
+							properties : {
+								staticproperty : "Hello",
+								dynamicproperty : "Wotcha wabbit!"
+							}
+						}
+					}
+				});
+
+				expect( m.getCommandProperty('test.dynamicproperty') ).to.equal('Wotcha wabbit!');
+
+				m.setCommandProperty('test.dynamicproperty', 'Something else');
+
+				m.command('test').clean();
+
+				expect( m.getCommandProperty('test.dynamicproperty') ).to.equal('Wotcha wabbit!');
+
+			});
+
+			it("can be cleaned by triggering a clean event", function (){
+
+				var m = new Model({
+					_commands : {
+						test : {
+							href : "/whatever",
+							method : "POST",
+							properties : {
+								staticproperty : "Hello",
+								dynamicproperty : "World"
+							}
+						}
+
+					}
+				});
+
+				m.setCommandProperty('test.dynamicproperty', 'Something else');
+
+				m.command('test').trigger('clean');
+
+				expect( m.getCommandProperty('test.dynamicproperty') ).to.equal('World');
+
+			});
+
+		});
+
 	});
 
 	describe("Reloading hypermedia", function(){
