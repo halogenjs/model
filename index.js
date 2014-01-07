@@ -477,9 +477,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 }
               }, 0);
               
-              if(nonObjects > 0){
-                current[key] = value;
-              } else {
+              if(nonObjects === 0){
 
                 // if we have an array but current[key]is a model, make it a collection
                 if(current[key].attributes){
@@ -534,9 +532,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                   });
                 }
 
+                delete attrs[key];
+
               }
             // clean up attributes
-            delete attrs[key];
+            
           } else {
             // it exists in the current model, but it's not an array 
             // so this is quite straightforward : recurse into set
