@@ -1778,6 +1778,35 @@ describe("Hyperbone model", function(){
 
 		});
 
+		it('converts collections into array literals when reinited with an array literal', function(){
+
+			var m = new Model({
+				test : []
+			});
+
+			m.set('test', ['array literal please']);
+
+			expect(m.get('test')).to.deep.equal(['array literal please']);
+
+		});
+
+		it('it can convert an array literal into a collection', function(){
+
+			var m = new Model({
+				test : []
+			});
+
+			m.set('test', ['array literal please']);
+
+			expect(m.get('test')).to.deep.equal(['array literal please']);
+
+			m.set('test', [{ name : 'array literal please'}]);
+
+			expect(m.get('test[0].name')).to.equal('array literal please');
+
+		});
+
+
 	})
 
 });

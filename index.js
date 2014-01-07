@@ -465,60 +465,76 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
           // is it an array, and we have a matching collection?
           if (_.isArray(value) || current[key].models){
 
-            var Proto;
-            // if we have a collection but it's not an array, make it an array
-            value = (_.isArray(value) ? value : [value]);
-            // if we have an array but current[key]is a model, make it a collection
-            if(current[key].attributes){
-              if (this._prototypes[key]){
-                Proto = this._prototypes[key];
+              var Proto;
+              // if we have a collection but it's not an array, make it an array
+              value = (_.isArray(value) ? value : [value]);
+
+              var nonObjects = _.reduce(value, function(memo, val){ 
+                if(!_.isObject(val)){ 
+                  return memo + 1;
+                } else {
+                  return memo; 
+                }
+              }, 0);
+              
+              if(nonObjects > 0){
+                current[key] = value;
               } else {
-                Proto = HyperboneModel;
+
+                // if we have an array but current[key]is a model, make it a collection
+                if(current[key].attributes){
+                  if (this._prototypes[key]){
+                    Proto = this._prototypes[key];
+                  } else {
+                    Proto = HyperboneModel;
+                  }
+                  // we want the default model to be a hyperbone model
+                  // or whatever the user has selected as a prototype
+                  var EmbeddedCollection = Collection.extend({
+                    model : Proto
+                  });
+                  // create an embedded collection..
+                  var collection = new EmbeddedCollection();
+                  collection.add(current[key]);
+                  current[key] = collection;
+                }
+
+                // if the existing collection or the array has no members...
+                if (value.length === 0 || current[key].length === 0){
+                  // call reset to minimise the number of events fired
+                  current[key].reset(value);
+                // or if they have the same number of members we want 'change' events for 
+                // every model in the collection.
+                } else if (current[key].length === value.length){
+                  // we do a straight change operation on each
+                  current[key].each(function(model, index){
+                    model.set(value[index]);
+                  });
+                // or if there's more in our collection than the array..
+                } else if (current[key].length > value.length){
+                  // we need to remove some models
+                  var destroyers = [];
+                   current[key].each(function(model, index){
+                    if(value[index]){
+                      model.set(value[index]);
+                    } else {
+                      destroyers.push(function(){current[key].remove(model);});
+                    }
+                  });
+                  _.each(destroyers, function(fn){fn();});
+                // or if there's less in our collection than the array...
+                } else {
+                  // we need to add some models
+                  _.each(value, function(value, index){
+                    if (current[key].at(index)){
+                      current[key].at(index).set(value);
+                    } else {
+                      current[key].add(value);
+                    }
+                  });
+                }
+
               }
-              // we want the default model to be a hyperbone model
-              // or whatever the user has selected as a prototype
-              var EmbeddedCollection = Collection.extend({
-                model : Proto
-              });
-              // create an embedded collection..
-              var collection = new EmbeddedCollection();
-              collection.add(current[key]);
-              current[key] = collection;
-            }
-            // if the existing collection or the array has no members...
-            if (value.length === 0 || current[key].length === 0){
-              // call reset to minimise the number of events fired
-              current[key].reset(value);
-            // or if they have the same number of members we want 'change' events for 
-            // every model in the collection.
-            } else if (current[key].length === value.length){
-              // we do a straight change operation on each
-              current[key].each(function(model, index){
-                model.set(value[index]);
-              });
-            // or if there's more in our collection than the array..
-            } else if (current[key].length > value.length){
-              // we need to remove some models
-              var destroyers = [];
-               current[key].each(function(model, index){
-                if(value[index]){
-                  model.set(value[index]);
-                } else {
-                  destroyers.push(function(){current[key].remove(model);});
-                }
-              });
-              _.each(destroyers, function(fn){fn();});
-            // or if there's less in our collection than the array...
-            } else {
-              // we need to add some models
-              _.each(value, function(value, index){
-                if (current[key].at(index)){
-                  current[key].at(index).set(value);
-                } else {
-                  current[key].add(value);
-                }
-              });
-            }
             // clean up attributes
             delete attrs[key];
           } else {
