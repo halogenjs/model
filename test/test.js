@@ -875,6 +875,42 @@ describe("Hyperbone model", function(){
 
 		});
 
+		it("publishes an event when the structure of a command changes", function (done){
+
+			var m = new Model({
+				_commands : {
+					test : {
+						href : "/whatever",
+						method : "POST",
+						properties : {
+							staticproperty : "",
+							dynamicproperty : ""
+						}
+					}
+				}
+
+			});
+
+			m.on('change-command-structure:test', function (){
+
+				done();
+
+			});
+
+			m.reinit({
+				_commands : {
+					test : {
+						href : "/whatever",
+						method : "POST",
+						properties : {
+							staticproperty : ""
+						}
+					}
+				}				
+			});
+
+		});
+
 		it('has a special getter for command properties', function (){
 
 			var m = new Model({

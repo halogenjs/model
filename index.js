@@ -242,19 +242,27 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
       _.each(attributes._commands, function(cmd, id){
 
         // is it an existing command?
-        var currentCmd;
+        var currentCmd, diffCount = 0;
         if(currentCmd = this.command(id)){ // assignment on purpose. DO NOT FIX.
           _.each(cmd, function(value, key){
             if (key !== 'properties'){
               currentCmd.set(key, value);
             } else {
               _.each(currentCmd.properties().toJSON(), function (currentValue, key){
+                // removing 
                 if(!value[key]){
+                  ++diffCount;
                   currentCmd.properties().unset(key, null);
-                }                
+                }         
               });
               _.each(value, function(value, key){
+                if(!currentCmd.properties().attributes[key]){
+                  ++diffCount;
+                }
                 currentCmd.properties().set(key, value);
+              });
+              signals.push(function(){
+                self.trigger('change-command-structure:' + id, self, currentCmd);
               });
             }
           });
