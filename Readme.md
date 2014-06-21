@@ -43,7 +43,11 @@ Nested [Backbone](http://backbonejs.org/) models with special support for [JSON 
 
 ## Installation
 
-Because Hyperbone is written in components, all the dependencies this module needs are installed with it. You do not need to include Backbone.js and Underscore.JS separately. Hyperbone Model actually makes use of a version of Backbone that has been refactored into separate components so that only the necessary parts are loaded. 
+Because Hyperbone is written in modules, all the dependencies this module needs are installed with it. You do not need to include Backbone.js and Underscore.JS separately. Hyperbone Model actually makes use of a version of Backbone that has been refactored into separate components so that only the necessary parts are loaded. 
+
+  Install with [npm(1)](http://npmjs.org):
+
+    $ npm install --save hyperbone-model
 
   Install with [component(1)](http://component.io):
 
@@ -525,6 +529,8 @@ Install testing tools. You probably need PhantomJS on your path.
 ```
 
 Run the tests:
+
+Tests are still using Component. Work is ongoing to replace this with a Browserify one.
 
 ```bash
   $ grunt test
