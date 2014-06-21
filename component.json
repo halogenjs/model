@@ -2,7 +2,7 @@
   "name": "hyperbone-model",
   "repo": "green-mesa/hyperbone-model",
   "description": "HAL extensions for Backbone Models",
-  "version": "0.5.4",
+  "version": "0.5.8",
   "keywords": [],
   "dependencies": {
     "green-mesa/backbone-model": "1.0.0",
@@ -15,7 +15,7 @@
   "scripts": [
     "index.js"
   ],
-  "remote" : [
-    "https://raw.github.com"
+  "remotes" : [
+    "https://raw.githubusercontent.com/"
   ]
 }

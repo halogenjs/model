@@ -6,6 +6,18 @@
 
 Nested [Backbone](http://backbonejs.org/) models with special support for [JSON HAL](http://stateless.co/hal_specification.html) and JSON Hypermedia Controls. 
 
+## Installation
+
+Because Hyperbone is written in modules, all the dependencies this module needs are installed with it. You do not need to include Backbone.js and Underscore.JS separately. Hyperbone Model actually makes use of a version of Backbone that has been refactored into separate components so that only the necessary parts are loaded. 
+
+  Install with [npm(1)](http://npmjs.org):
+
+    $ npm install --save hyperbone-model
+
+  Install with [component(1)](http://component.io):
+
+    $ component install green-mesa/hyperbone-model
+
 ## Intro
 
   Default Backbone models are [Active Record](http://en.wikipedia.org/wiki/Active_record_pattern). You have a resource and you can do CRUD operations on it and that's great. "Getting your truth out of the DOM" is true and rich, complex client-side applications can be built.
@@ -40,14 +52,6 @@ Nested [Backbone](http://backbonejs.org/) models with special support for [JSON 
   - ability to assign custom Model prototypes for use with specific attributes with custom _prototypes attribute.
   - Special _commands keyword
 
-
-## Installation
-
-Because Hyperbone is written in components, all the dependencies this module needs are installed with it. You do not need to include Backbone.js and Underscore.JS separately. Hyperbone Model actually makes use of a version of Backbone that has been refactored into separate components so that only the necessary parts are loaded. 
-
-  Install with [component(1)](http://component.io):
-
-    $ component install green-mesa/hyperbone-model
 
 ## API
 
@@ -525,6 +529,8 @@ Install testing tools. You probably need PhantomJS on your path.
 ```
 
 Run the tests:
+
+Tests are still using Component. Work is ongoing to replace this with a Browserify one.
 
 ```bash
   $ grunt test
