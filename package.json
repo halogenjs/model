@@ -1,10 +1,16 @@
 {
   "name": "hyperbone-model",
-  "version": "0.5.4",
-  "description": "Hyperbone model",
+  "version": "0.5.6",
+  "description": "Hypermedia extensions and nesting for Backbone Models",
   "main": "index.js",
   "scripts": {
     "test": "grunt install-build-test"
+  },
+  "dependencies": {
+    "backbone-model": "1.0.6",
+    "backbone-collection": "1.0.6",
+    "underscore": "1.4.4",
+    "uritemplate": "~0.3.4"
   },
   "repository": {
     "type": "git",
