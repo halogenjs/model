@@ -26,7 +26,6 @@
     "grunt-mocha-phantomjs": "~0.3.0",
     "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-watch": "~0.5.3",
-    "component": "~0.17.4",
     "chai": "~1.9.0",
     "mocha": "~1.17.1"
   },
