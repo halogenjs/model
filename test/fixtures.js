@@ -378,7 +378,7 @@ var fixtures = {
 
 };
 
-var useFixture = function(id){
+module.exports = function(id){
 
 	return JSON.parse( JSON.stringify(fixtures[id]) );
 

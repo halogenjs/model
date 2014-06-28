@@ -14,9 +14,12 @@ Because Hyperbone is written in modules, all the dependencies this module needs 
 
     $ npm install --save hyperbone-model
 
-  Install with [component(1)](http://component.io):
+## Tests
 
-    $ component install green-mesa/hyperbone-model
+Clone the repo, do an npm install, install grunt-cli if you don't already have it then
+```js
+$ npm test
+```
 
 ## Intro
 
@@ -516,25 +519,6 @@ Commands can push their properties directly to other Commands. This only copies 
 ### .pullFrom( command )
 
 Commands can also pull properties from another command, but it only pulls properties that exist inside itself. 
-
-## Testing
-
-Hyperbone is covered by tests. It does not test underlying Backbone Model functionality, but the Backbone-model component used as a dependency
-has been evalated against the real Backbone test suite and passes all tests.
-
-Install testing tools. You probably need PhantomJS on your path.
-
-```back
-  $ npm install
-```
-
-Run the tests:
-
-Tests are still using Component. Work is ongoing to replace this with a Browserify one.
-
-```bash
-  $ grunt test
-```
 
 
 ## License

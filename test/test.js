@@ -1,10 +1,17 @@
+var useFixture = require('./fixtures.js');
+var chai = require('chai');
+var expect = chai.expect;
+var should = chai.should();
+
+var hyperboneModel = require('../index.js');
+
 describe("Hyperbone model", function(){
 
 	describe("Initialisation", function(){
 
 		it("can require the hyperbone module", function(){
 
-			var Model = require('hyperbone-model').Model;
+			var Model = hyperboneModel.Model;
 
 			expect( Model ).to.be.ok;
 			expect( new Model({ _links: { self : { href : "/test"}}}) ).to.be.ok;
@@ -17,7 +24,7 @@ describe("Hyperbone model", function(){
 	describe("Attribute setting and getting", function(){
 		// built into hyperbone is the automatic nesting of objects and arrays of objects
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it("does the usual backbone shit with bog standard attributes", function(){
 
@@ -266,7 +273,7 @@ describe("Hyperbone model", function(){
 
 	describe("To JSON", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it("Successfully serialises itself back to JSON", function(){
 
@@ -354,7 +361,7 @@ describe("Hyperbone model", function(){
 
 	describe("Embedding", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it("turns a single embedded object into an attribute", function(){
 
@@ -439,7 +446,7 @@ describe("Hyperbone model", function(){
 
 	describe("Link handling", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it("can set and get the correct self href", function(){
 
@@ -572,7 +579,7 @@ describe("Hyperbone model", function(){
 
 	describe("Commands", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it("does not add _commands as attributes - reserved property", function(){
 
@@ -1134,7 +1141,7 @@ describe("Hyperbone model", function(){
 
 	describe("Reloading hypermedia", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it("Has a reset method", function(){
 
@@ -1268,7 +1275,7 @@ describe("Hyperbone model", function(){
 
 	describe("Pre-parsing", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it("allows a preParser to be defined", function(){
 
@@ -1287,7 +1294,7 @@ describe("Hyperbone model", function(){
 
 	describe("Nested collections", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it('issues reset event when the collection is emptied', function( done ){
 
@@ -1401,7 +1408,7 @@ describe("Hyperbone model", function(){
 
 	describe("Evented links (Issue #2)", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it('should issue a add-rel event when a new rel is found', function( done ){
 
@@ -1486,7 +1493,7 @@ describe("Hyperbone model", function(){
 
 	describe("Evented commands (issue #6)", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it('should issue a add-command event when a command is found', function( done ){
 
@@ -1539,7 +1546,7 @@ describe("Hyperbone model", function(){
 
 	describe("syncCommands flag: Keeping commands in sync with the parent model automatically", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it('automatically updates all identically named command properties that have the same value as the parent model on initialisation', function(){
 
@@ -1765,7 +1772,7 @@ describe("Hyperbone model", function(){
 
 	describe("Issues", function(){
 
-		var Model = require('hyperbone-model').Model;
+		var Model = hyperboneModel.Model;
 
 		it('should not throw an error when an unknown rel is requested (issue #4)', function(){
 
