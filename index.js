@@ -1,5 +1,5 @@
 /*
- * Hyperbone Model
+ * Halogen Model
  * 
  * Author : Charlotte Gore
  * Version : 0.0.1
@@ -10,11 +10,11 @@
 var _ = require('underscore');
 var BackboneModel = require('backbone-model').Model;
 var Collection = require('backbone-collection').Collection.extend({
-  isHyperbone : true,
+  isHalogen : true,
   toJSON : function (){
     var arr = [];
     _.each(this.models, function (model, index){
-      if (model.isHyperbone){
+      if (model.isHalogen){
         arr.push(model.toJSON());
       } else {
         arr.push(model);
@@ -28,7 +28,7 @@ var makeTemplate = require('uritemplate').parse;
 
 var Command;
 
-var HyperboneModel = function HyperboneModel (attributes, options){
+var HalogenModel = function HalogenModel (attributes, options){
 
   // we override the initial function because we need to force a hypermedia parse at the
   // instantiation stage, not just the fetch/sync stage
@@ -39,7 +39,7 @@ var HyperboneModel = function HyperboneModel (attributes, options){
   this.attributes = {};
   this.cid = _.uniqueId('c');
 
-  this.isHyperbone = true;
+  this.isHalogen = true;
 
   if (!this._prototypes) this._prototypes = {};
   if (!this.syncCommands) this.syncCommands = false;
@@ -80,7 +80,7 @@ var HyperboneModel = function HyperboneModel (attributes, options){
 
 };
 
-_.extend(HyperboneModel.prototype, BackboneModel.prototype, {
+_.extend(HalogenModel.prototype, BackboneModel.prototype, {
 
   reinit : function reinitialiseModel ( attributes, options ){
 
@@ -225,7 +225,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     if (attributes._commands){
 
       if (!this._commands){
-        this._commands = new HyperboneModel();
+        this._commands = new HalogenModel();
       } else {
         // find any deleted commands and delete them...
         _.each(this._commands.attributes, function (cmd, id){
@@ -318,7 +318,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     var obj = {};
     _.each(this.attributes, function (attr, key){
 
-      if (attr && attr.isHyperbone){
+      if (attr && attr.isHalogen){
         obj[key] = attr.toJSON();
       } else if (attr || attr === 0 || attr === '') {
         obj[key] = attr;
@@ -364,7 +364,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  get: function hyperboneGet (attr) {
+  get: function halogenGet (attr) {
 
     if (this.attributes[attr] || this.attributes[attr] === 0 || this.attributes[attr] === ''){
 
@@ -420,7 +420,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
   },
 
-  set: function hyperboneSet (key, val, options) {
+  set: function halogenSet (key, val, options) {
 
     var self = this;
 
@@ -469,7 +469,7 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
     if (!_.isEmpty(this.attributes)){
       _.each(attrs, function (value, key){
         // is it an object that currently exists in this model?
-        if (_.isObject(value) && current[key] && current[key].isHyperbone){
+        if (_.isObject(value) && current[key] && current[key].isHalogen){
           // is it an array, and we have a matching collection?
           if (_.isArray(value) || current[key].models){
 
@@ -492,9 +492,9 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
                 if (this._prototypes[key]){
                   Proto = this._prototypes[key];
                 } else {
-                  Proto = HyperboneModel;
+                  Proto = HalogenModel;
                 }
-                // we want the default model to be a hyperbone model
+                // we want the default model to be a halogen model
                 // or whatever the user has selected as a prototype
                 var EmbeddedCollection = Collection.extend({
                   model : Proto
@@ -570,11 +570,11 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
         // is val an object?
         if (_.isObject(val) && !_.isArray(val)){
           // is it a plain old javascript object?
-          if (!val.isHyperbone && !noTraverse){
+          if (!val.isHalogen && !noTraverse){
             if (this._prototypes[attr]){
               Proto = this._prototypes[attr];
             } else {
-              Proto = HyperboneModel;
+              Proto = HalogenModel;
             }
             val = new Proto( val );
             val._parent = self;
@@ -608,9 +608,9 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
             if (this._prototypes[attr]){
               Proto = this._prototypes[attr];
             } else {
-              Proto = HyperboneModel;
+              Proto = HalogenModel;
             }
-            // we want the default model to be a hyperbone model
+            // we want the default model to be a halogen model
             // or whatever the user has selected as a prototype
             var EmbeddedCollection = Collection.extend({
               model : Proto
@@ -715,9 +715,9 @@ _.extend(HyperboneModel.prototype, BackboneModel.prototype, {
 
 });
 
-HyperboneModel.extend = BackboneModel.extend;
+HalogenModel.extend = BackboneModel.extend;
 
-Command = HyperboneModel.extend({
+Command = HalogenModel.extend({
 
   defaults : {
     method : '',
@@ -783,5 +783,5 @@ Command = HyperboneModel.extend({
   }
 });
 
-module.exports.Model = HyperboneModel;
+module.exports.Model = HalogenModel;
 module.exports.Collection = Collection;

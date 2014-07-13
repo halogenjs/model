@@ -1,4 +1,4 @@
-# Hyperbone Model
+# Halogen Model
 
 [![Build Status](https://travis-ci.org/green-mesa/hyperbone-model.png?branch=master)](https://travis-ci.org/green-mesa/hyperbone-model)
 
@@ -8,7 +8,7 @@ Nested [Backbone](http://backbonejs.org/) models with special support for [JSON 
 
 ## Installation
 
-Because Hyperbone is written in modules, all the dependencies this module needs are installed with it. You do not need to include Backbone.js and Underscore.JS separately. Hyperbone Model actually makes use of a version of Backbone that has been refactored into separate components so that only the necessary parts are loaded. 
+Because Halogen is written in modules, all the dependencies this module needs are installed with it. You do not need to include Backbone.js and Underscore.JS separately. Halogen Model actually makes use of a version of Backbone that has been refactored into separate components so that only the necessary parts are loaded. 
 
   Install with [npm(1)](http://npmjs.org):
 
@@ -29,20 +29,19 @@ $ npm test
 
   Rich REST level 3 Hypermedia APIs become, in effect, a complete expression of your application in their own right. 
 
-  __Hyperbone__ extends Backbone to attempt to support HAL properly, to make building client-side applications consuming Hypermedia APIs as painless as possible. It's more opinionated than standard Backbone (out of necessity), but as this is a modular framework you only use the modules you need and that fit with the way you work.
+  __Halogen__ extends Backbone to attempt to support HAL properly, to make building client-side applications consuming Hypermedia APIs as painless as possible. It's more opinionated than standard Backbone (out of necessity), but as this is a modular framework you only use the modules you need and that fit with the way you work.
 
-  To this end, the roadmap for Hyperbone is as follows:
+  To this end, the roadmap for Halogen is as follows:
 
-  - __Hyperbone Model__ : Nested Backbone models that support Hypermedia natively, supporting uri templates, rels, controls and embedded resources
-  - __Hyperbone View__ : Binding Hyperbone Models to the DOM
-  - __Hyperbone View Command Extensions__ : Binding _commands to the DOM
-  - __Hyperbone IO__ : HTTP extensions for Hyperbone Models
-  - __Hyperbone Router__ : Sinatra/Express style routing for Hyperbone Applications
+  - __Halogen Model__ : Nested Backbone models that support Hypermedia natively, supporting uri templates, rels, controls and embedded resources
+  - __Halogen View__ : Binding Halogen Models to the DOM
+  - __Halogen Resource__ : Halogen models with build in HTTP extensions for easy REST interactions
+  - __Halogen Router__ : Sinatra/Express style routing for Halogen Applications
 
   
 ## WARNING!
 
-  To remove the jQuery dependency and because Models in Hyperbone are not Active Records, the .sync() and .fetch() functionality has been stripped out. Changes to models are via commands, which are forms that are submitted to a server. HTTP interactions will be handled by the IO module (in development)
+  To remove the jQuery dependency and because Models in Halogen are not Active Records, the .sync() and .fetch() functionality has been stripped out. Changes to models are via commands, which are forms that are submitted to a server. HTTP interactions with a server need the Halogen Resource module which extends Halogen Model.
 
 ## Features
 
@@ -124,13 +123,13 @@ Preventing recursive traversal (i.e, for DOM elements or anything with cyclical 
 
 ### .get( attr )
 
-Hyperbone extends the .get() method to allow dot notation and indexed access notation to access these nested properties.
+Halogen extends the .get() method to allow dot notation and indexed access notation to access these nested properties.
 
 The dot notation feature is just basic string manipulation and recursive calls to .get(), and obviously you can always fall back to basic chaining if there's an issue - although reports of issues are welcome.
 
 ### More about using get and set...
 
-The philosophy behind Hyperbone means resources are embeddable within resources which means it's models and collections all the way down. 
+The philosophy behind Halogen means resources are embeddable within resources which means it's models and collections all the way down. 
 
 Automatic models... 
 
@@ -285,7 +284,6 @@ Shortcut to .rel('self');
 Set the _links.self.href value. Easier than new Model({ _links : { self : { href : "/some-uri"}}});
 
 ```
-// With HyperboneIO extensions...
 var model = new Model().url('/some-uri');
 model.url(); // /some-uri
 ```
@@ -323,7 +321,7 @@ Returns all the links. Hypermedia is about self discovery, after all.
 
 ### .fullyQualifiedRel( rel )
 
-Hyperbone supports curie (and `curies` with an array, incidentally), and offers a neato utility to recover the fully qualitied uri of a curied rel.
+Halogen supports curie (and `curies` with an array, incidentally), and offers a neato utility to recover the fully qualitied uri of a curied rel.
 
 ```javascript
   var model = new Model({
@@ -348,7 +346,7 @@ Hyperbone supports curie (and `curies` with an array, incidentally), and offers 
 
 ### .reinit( hypermedia )
 
-Reinit is specific to Hyperbone Model. It returns all properties to any default values set in the model prototype and then merges in the newly loaded Hypermedia. Change events for issued for everything that's changed between the two versions. In a way this is more of an internal method to be used by Hyperbone IO but if you're using jQuery or some other separate HTTP system then .
+Reinit is specific to Halogen Model. It returns all properties to any default values set in the model prototype and then merges in the newly loaded Hypermedia. Change events for issued for everything that's changed between the two versions. In a way this is more of an internal method to be used by Halogen Resource but if you're using jQuery or some other separate HTTP system then this is a much cleaner way of updating your local models.
 
 ```js
 var MyModel = Model.extend({
@@ -373,15 +371,15 @@ model.get('thing', 'Some other value!');
 
 ## Commands
 
-Not part of the HAL Spec, but a crucial part of Hyperbone and the whole philosophy behind it. Model supports "Hypermedia Commands", using the reserved property `_commands`.
+Not part of the HAL Spec, but a crucial part of Halogen and the whole philosophy behind it. Model supports "Hypermedia Commands", using the reserved property `_commands`.
 
 We won't go into too much detail here, but Commands represent HTTP interactions available to a resource. The simplest commands contain only what is necessary for a client to make a valid HTTP request, and the plan is the allow adding a schema to these so allow for validation/more useful form generation.
 
 These commands could come from the server as part of the Hypermedia document you've loaded, or they can be defined in the model prototype with `defaults` and thus form a client side Hypermedia definition of the various HTTP interactions - or even just forms - that your application has. 
 
-One nifty side effect of defining `_commands` in the model prototype is that it can either make Hyperbone worth with non-Hypermedia APIs, or it can form the spec/definition of an as-yet non-existing API. You can build your client side application without even seeing an API then use the `_commands` and your dummy handlers to build an API spec. It's pretty cool. 
+One nifty side effect of defining `_commands` in the model prototype is that it can either make Halogen work with non-Hypermedia APIs, or it can form the spec/definition of an as-yet non-existing API. You can build your client side application without even seeing an API then use the `_commands` and your dummy handlers to build an API spec. It's pretty cool. 
 
-Hyperbone Model offers a method for getting at Commands in your model, and commands themselves have a few special methods built in.
+Halogen Model offers a method for getting at Commands in your model, and commands themselves have a few special methods built in.
 
 Commands need a method, an href and some properties. The properties are just an object containing key-value pairs representing the form fields that the server expects to see in the submitted form. 
 
@@ -429,7 +427,7 @@ model.get('Username'); // "Terry Wogan"
 model.command('edit-user').properties().get('Username'); // "Terry Wogan"
 ```
 
-Hyperbone Model offers a method to automatically detect these and then keep them automatically synchronised. In a way this behaviour emulates the classic Backbone developer experience, where you bind a view to your model, manipulate just that model and then, when you're wanting to persist something you execute a command (which handily has any changes made to the parent model reflected in it automatically).
+Halogen Model offers a method to automatically detect these and then keep them automatically synchronised. In a way this behaviour emulates the classic Backbone developer experience, where you bind a view to your model, manipulate just that model and then, when you're wanting to persist something you execute a command (which handily has any changes made to the parent model reflected in it automatically).
 
 To use Command/Model sync, do:
 
@@ -506,9 +504,9 @@ model.get('name');
 
 ### About push and pull more generally
 
-In the Hyperbone world, when you want to gather data from a user, you can bind a particular input to a particular model attribute like you would with Backbone. And that's fine. 
+In the Halogen world, when you want to gather data from a user, you can bind a particular input to a particular model attribute like you would with Backbone. And that's fine. 
 
-But Hyperbone adds the ability to bind entire forms to Commands. These commands may need seralising and sending to a server, or maybe they'll just be dealt with by your own application. Doesn't really matter. They're just commands, operations that will change your resource in some way, either locally or remotely.
+But Halogen adds the ability to bind entire forms to Commands. These commands may need seralising and sending to a server, or maybe they'll just be dealt with by your own application. Doesn't really matter. They're just commands, operations that will change your resource in some way, either locally or remotely.
 
 But Commands don't interact with the parent model by default. They're isolated. The reason the .push() and .pull() methods exist is so that you can slowly build up your model using various commands, pushing their properties into your model and then have another command pull all the data it needs from the model ready for submitting to the server. 
 

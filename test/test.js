@@ -3,15 +3,15 @@ var chai = require('chai');
 var expect = chai.expect;
 var should = chai.should();
 
-var hyperboneModel = require('../index.js');
+var halogenModel = require('../index.js');
 
-describe("Hyperbone model", function(){
+describe("Halogen model", function(){
 
 	describe("Initialisation", function(){
 
-		it("can require the hyperbone module", function(){
+		it("can require the halogen module", function(){
 
-			var Model = hyperboneModel.Model;
+			var Model = halogenModel.Model;
 
 			expect( Model ).to.be.ok;
 			expect( new Model({ _links: { self : { href : "/test"}}}) ).to.be.ok;
@@ -22,9 +22,9 @@ describe("Hyperbone model", function(){
 	});
 
 	describe("Attribute setting and getting", function(){
-		// built into hyperbone is the automatic nesting of objects and arrays of objects
+		// built into halogen is the automatic nesting of objects and arrays of objects
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it("does the usual backbone shit with bog standard attributes", function(){
 
@@ -273,7 +273,7 @@ describe("Hyperbone model", function(){
 
 	describe("To JSON", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it("Successfully serialises itself back to JSON", function(){
 
@@ -361,7 +361,7 @@ describe("Hyperbone model", function(){
 
 	describe("Embedding", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it("turns a single embedded object into an attribute", function(){
 
@@ -446,7 +446,7 @@ describe("Hyperbone model", function(){
 
 	describe("Link handling", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it("can set and get the correct self href", function(){
 
@@ -579,7 +579,7 @@ describe("Hyperbone model", function(){
 
 	describe("Commands", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it("does not add _commands as attributes - reserved property", function(){
 
@@ -1141,7 +1141,7 @@ describe("Hyperbone model", function(){
 
 	describe("Reloading hypermedia", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it("Has a reset method", function(){
 
@@ -1275,7 +1275,7 @@ describe("Hyperbone model", function(){
 
 	describe("Pre-parsing", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it("allows a preParser to be defined", function(){
 
@@ -1294,7 +1294,7 @@ describe("Hyperbone model", function(){
 
 	describe("Nested collections", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it('issues reset event when the collection is emptied', function( done ){
 
@@ -1408,7 +1408,7 @@ describe("Hyperbone model", function(){
 
 	describe("Evented links (Issue #2)", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it('should issue a add-rel event when a new rel is found', function( done ){
 
@@ -1493,7 +1493,7 @@ describe("Hyperbone model", function(){
 
 	describe("Evented commands (issue #6)", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it('should issue a add-command event when a command is found', function( done ){
 
@@ -1546,7 +1546,7 @@ describe("Hyperbone model", function(){
 
 	describe("syncCommands flag: Keeping commands in sync with the parent model automatically", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it('automatically updates all identically named command properties that have the same value as the parent model on initialisation', function(){
 
@@ -1772,7 +1772,7 @@ describe("Hyperbone model", function(){
 
 	describe("Issues", function(){
 
-		var Model = hyperboneModel.Model;
+		var Model = halogenModel.Model;
 
 		it('should not throw an error when an unknown rel is requested (issue #4)', function(){
 
