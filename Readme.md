@@ -1,6 +1,6 @@
 # Halogen Model
 
-[![Build Status](https://travis-ci.org/green-mesa/hyperbone-model.png?branch=master)](https://travis-ci.org/green-mesa/hyperbone-model)
+[![Build Status](https://travis-ci.org/halogenjs/model.png?branch=master)](https://travis-ci.org/halogenjs/model)
 
 ## tldr;
 
@@ -12,7 +12,7 @@ Because Halogen is written in modules, all the dependencies this module needs ar
 
   Install with [npm(1)](http://npmjs.org):
 
-    $ npm install --save hyperbone-model
+    $ npm install --save halogen-model
 
 ## Tests
 

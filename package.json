@@ -1,6 +1,6 @@
 {
   "name": "halogen-model",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Hypermedia extensions and nesting for Backbone Models",
   "main": "index.js",
   "scripts": {
